@@ -18,7 +18,7 @@ public class OpenCodeClient {
         ApiClient client = new ApiClient();
 
         if (config.getBaseUrl() != null) {
-            client.setBasePath(config.getBaseUrl());
+            client.updateBaseUri(config.getBaseUrl());
         }
 
         if (config.getUsername() != null && config.getPassword() != null) {
