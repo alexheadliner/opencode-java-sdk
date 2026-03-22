@@ -1,0 +1,5 @@
+{
+  "z.ai": {
+    "apiKey": "${Z_AI_API_KEY}"
+  }
+}

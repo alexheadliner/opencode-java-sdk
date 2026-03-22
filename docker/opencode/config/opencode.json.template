@@ -1,0 +1,42 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "z.ai": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Z.AI",
+      "options": {
+        "baseURL": "https://api.z.ai/api/coding/paas/v4",
+        "apiKey": "${Z_AI_API_KEY}",
+        "timeout": 30000
+      },
+      "models": {
+        "glm-4.7": {
+          "name": "glm-4.7"
+        }
+      }
+    }
+  },
+  "model": "z.ai/glm-4.7",
+  "mcp": {
+    "web-search-prime": {
+      "type": "remote",
+      "url": "https://api.z.ai/api/mcp/web_search_prime/mcp",
+      "headers": {
+        "Authorization": "Bearer ${Z_AI_API_KEY}"
+      }
+    },
+    "web-reader": {
+      "type": "remote",
+      "url": "https://api.z.ai/api/mcp/web_reader/mcp",
+      "headers": {
+        "Authorization": "Bearer ${Z_AI_API_KEY}"
+      }
+    }
+  },
+  "server": {
+    "port": ${OPENCODE_SERVER_PORT:-4096},
+    "hostname": "${OPENCODE_SERVER_HOST:-0.0.0.0}"
+  },
+  "autoupdate": false,
+  "share": "manual"
+}

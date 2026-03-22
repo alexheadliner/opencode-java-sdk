@@ -1,0 +1,6 @@
+/.idea/
+/docker/opencode/.env.opencode
+/sdk/target/
+/opencode-spring-boot-starter/target/
+/examples/plain-java/target/
+/examples/spring-boot/target/
