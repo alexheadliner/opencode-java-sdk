@@ -1,29 +1,53 @@
 package opencode.sdk.springboot.autoconfigure;
 
-import lombok.RequiredArgsConstructor;
+import opencode.sdk.api.DefaultApi;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.config.OpenCodeConfig;
-import opencode.sdk.springboot.OpenCodeService;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
+import opencode.sdk.invoker.ApiClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@AutoConfiguration
+import java.util.Base64;
+
+@Configuration
+@ConditionalOnClass(OpenCodeClient.class)
 @EnableConfigurationProperties(OpenCodeProperties.class)
-@RequiredArgsConstructor
 public class OpenCodeAutoConfiguration {
-
-    private final OpenCodeProperties properties;
 
     @Bean
     @ConditionalOnMissingBean
-    public OpenCodeConfig openCodeConfig() {
+    public OpenCodeConfig openCodeConfig(OpenCodeProperties properties) {
         OpenCodeConfig config = new OpenCodeConfig();
         config.setBaseUrl(properties.getBaseUrl());
-        config.setApiKey(properties.getApiKey());
-        config.setTimeout(properties.getTimeout());
+        config.setUsername(properties.getUsername());
+        config.setPassword(properties.getPassword());
         return config;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ApiClient apiClient(OpenCodeConfig config) {
+        ApiClient client = new ApiClient();
+
+        if (config.getBaseUrl() != null) {
+            client.updateBaseUri(config.getBaseUrl());
+        }
+
+        if (config.getUsername() != null && config.getPassword() != null) {
+            String authHeader = createBasicAuthHeader(config.getUsername(), config.getPassword());
+            client.setRequestInterceptor(builder -> builder.header("Authorization", authHeader));
+        }
+
+        return client;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DefaultApi defaultApi(ApiClient apiClient) {
+        return new DefaultApi(apiClient);
     }
 
     @Bean
@@ -32,9 +56,9 @@ public class OpenCodeAutoConfiguration {
         return new OpenCodeClient(config);
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public OpenCodeService openCodeService(OpenCodeClient openCodeClient) {
-        return new OpenCodeService(openCodeClient);
+    private String createBasicAuthHeader(String username, String password) {
+        String credentials = username + ":" + password;
+        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
+        return "Basic " + encoded;
     }
 }

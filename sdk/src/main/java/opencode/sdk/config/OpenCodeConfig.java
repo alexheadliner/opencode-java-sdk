@@ -2,9 +2,22 @@ package opencode.sdk.config;
 
 public class OpenCodeConfig {
 
-    private String baseUrl;
-    private String apiKey;
-    private int timeout;
+    private String baseUrl = "http://localhost:4096";
+    private String username;
+    private String password;
+
+    public OpenCodeConfig() {
+    }
+
+    public OpenCodeConfig(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
+    public OpenCodeConfig(String baseUrl, String username, String password) {
+        this.baseUrl = baseUrl;
+        this.username = username;
+        this.password = password;
+    }
 
     public String getBaseUrl() {
         return baseUrl;
@@ -14,19 +27,19 @@ public class OpenCodeConfig {
         this.baseUrl = baseUrl;
     }
 
-    public String getApiKey() {
-        return apiKey;
+    public String getUsername() {
+        return username;
     }
 
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public int getTimeout() {
-        return timeout;
+    public String getPassword() {
+        return password;
     }
 
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

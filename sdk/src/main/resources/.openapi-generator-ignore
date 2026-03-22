@@ -1,0 +1,17 @@
+# OpenAPI Generator Ignore File
+# Files listed here will not be generated
+# Paths are relative to the output directory (target/generated-sources/openapi)
+
+# Exclude problematic anyOf models that generate invalid Java syntax
+
+
+# Exclude related test files
+
+
+# Exclude docs
+docs/ConfigFormatter.md
+docs/ConfigLsp.md
+docs/IgnoredPermissionRuleConfig.md
+docs/PermissionRuleConfig.md
+docs/ConfigFormatterAnyOfValue.md
+docs/ConfigLspAnyOfValue.md

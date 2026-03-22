@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "opencode")
 public class OpenCodeProperties {
 
-    private String baseUrl = "http://localhost:8080";
-    private String apiKey;
-    private int timeout = 30;
+    private String baseUrl = "http://localhost:4096";
+    private String username;
+    private String password;
 }

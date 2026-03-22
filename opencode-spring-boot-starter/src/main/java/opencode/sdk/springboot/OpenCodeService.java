@@ -1,17 +1,22 @@
 package opencode.sdk.springboot;
 
 import lombok.RequiredArgsConstructor;
-import opencode.sdk.client.OpenCodeClient;
-import opencode.sdk.model.ApiResponse;
+import opencode.sdk.api.DefaultApi;
+import opencode.sdk.invoker.ApiException;
+import opencode.sdk.model.GlobalHealth200Response;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class OpenCodeService {
 
-    private final OpenCodeClient openCodeClient;
+    private final DefaultApi defaultApi;
 
-    public ApiResponse getData(String endpoint) {
-        return openCodeClient.get(endpoint);
+    public GlobalHealth200Response getHealth() throws ApiException {
+        return defaultApi.globalHealth();
+    }
+
+    public DefaultApi api() {
+        return defaultApi;
     }
 }
