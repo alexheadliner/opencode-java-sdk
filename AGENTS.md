@@ -123,10 +123,28 @@ The OpenCode server API specification is available at:
 ## Key Components
 
 ### SDK Module (`sdk/`)
-- `OpenCodeClient` - HTTP client for API communication
-- `OpenCodeConfig` - Configuration properties
-- `OpenCodeException` - Base exception class
-- `ApiResponse` - API response model
+The SDK is now auto-generated from OpenAPI specification and includes:
+
+**API Classes** (`opencode.sdk.api`)
+- `DefaultApi` - Main API class with 50+ endpoint methods (agents, auth, commands, config, events, files, search, sessions, etc.)
+- `SessionApi` - Session-specific operations (sessionChildren, sessionGet)
+
+**Infrastructure** (`opencode.sdk.invoker`)
+- `ApiClient` - Base HTTP client for all API calls
+- `Configuration` - Global SDK configuration
+- `ApiException` - API exception handling
+- `ApiResponse<T>` - Generic response wrapper
+
+**Custom Classes** (manual implementations)
+- `OpenCodeClient` - Custom HTTP client wrapper (in `client/` package)
+- `OpenCodeConfig` - Configuration properties (in `config/` package)
+- `OpenCodeException` - Base runtime exception (in root package)
+
+**Models** (`opencode.sdk.model`)
+- 150+ auto-generated model classes for requests, responses, and data structures
+- `ApiResponse` - Response model (original, in model package)
+
+**Note:** The SDK uses OpenAPI Generator (v7.10.0) to auto-generate classes in `api/`, `invoker/`, and `model/` packages from the OpenAPI specification. These generated classes should not be manually edited. Custom implementations should go in `client/` and `config/` packages.
 
 ### Spring Boot Starter (`opencode-spring-boot-starter/`)
 - `OpenCodeAutoConfiguration` - Auto-configuration class
