@@ -1,7 +1,7 @@
 package opencode.sdk.client;
 
-import opencode.sdk.config.OpenCodeConfig;
 import opencode.sdk.api.DefaultApi;
+import opencode.sdk.config.OpenCodeConfig;
 import opencode.sdk.invoker.ApiClient;
 
 public class OpenCodeClient {
@@ -25,8 +25,8 @@ public class OpenCodeClient {
             // Set up HTTP Basic Authentication using request interceptor
             String auth = config.getUsername() + ":" + config.getPassword();
             String encodedAuth = java.util.Base64.getEncoder().encodeToString(auth.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-            client.setRequestInterceptor(builder -> 
-                builder.header("Authorization", "Basic " + encodedAuth)
+            client.setRequestInterceptor(builder ->
+                    builder.header("Authorization", "Basic " + encodedAuth)
             );
         }
 

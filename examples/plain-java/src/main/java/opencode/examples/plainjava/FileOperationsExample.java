@@ -2,11 +2,7 @@ package opencode.examples.plainjava;
 
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.invoker.ApiException;
-import opencode.sdk.model.FileNode;
-import opencode.sdk.model.FileContent;
-import opencode.sdk.model.ModelFile;
-import opencode.sdk.model.Symbol;
-import opencode.sdk.model.FindText200ResponseInner;
+import opencode.sdk.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,9 +53,9 @@ public class FileOperationsExample {
         logger.info("\n--- Listing Files in Directory: {} ---", path);
 
         List<FileNode> files = client.api().fileList(
-            path,
-            null,  // directory
-            null   // workspace
+                path,
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Found {} entries:", files.size());
@@ -81,9 +77,9 @@ public class FileOperationsExample {
         logger.info("\n--- Reading File: {} ---", path);
 
         FileContent content = client.api().fileRead(
-            path,
-            null,  // directory
-            null   // workspace
+                path,
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("File Type: {}", content.getType());
@@ -100,8 +96,8 @@ public class FileOperationsExample {
         logger.info("\n--- Getting Git File Status ---");
 
         List<ModelFile> files = client.api().fileStatus(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         if (files.isEmpty()) {
@@ -122,12 +118,12 @@ public class FileOperationsExample {
         logger.info("\n--- Finding Files: {} ---", pattern);
 
         List<String> files = client.api().findFiles(
-            pattern,
-            null,  // directory
-            null,  // workspace
-            null,  // dirs
-            null,  // type
-            10     // limit
+                pattern,
+                null,  // directory
+                null,  // workspace
+                null,  // dirs
+                null,  // type
+                10     // limit
         );
 
         logger.info("Found {} files matching '{}'", files.size(), pattern);
@@ -140,9 +136,9 @@ public class FileOperationsExample {
         logger.info("\n--- Searching Text: {} ---", searchPattern);
 
         List<FindText200ResponseInner> results = client.api().findText(
-            searchPattern,
-            null,  // directory
-            null   // workspace
+                searchPattern,
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Found {} matches for '{}'", results.size(), searchPattern);
@@ -163,9 +159,9 @@ public class FileOperationsExample {
         logger.info("\n--- Finding Symbols: {} ---", query);
 
         List<Symbol> symbols = client.api().findSymbols(
-            query,
-            null,  // directory
-            null   // workspace
+                query,
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Found {} symbols matching '{}'", symbols.size(), query);

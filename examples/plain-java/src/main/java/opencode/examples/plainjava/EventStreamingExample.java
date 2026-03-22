@@ -41,8 +41,8 @@ public class EventStreamingExample {
         logger.info("\n--- Subscribing to Project Events (SSE) ---");
 
         Event event = client.api().eventSubscribe(
-            null,  // directory - uses current directory
-            null   // workspace - uses default workspace
+                null,  // directory - uses current directory
+                null   // workspace - uses default workspace
         );
 
         logger.info("Successfully subscribed to project events!");

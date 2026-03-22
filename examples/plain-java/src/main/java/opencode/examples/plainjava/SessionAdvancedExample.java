@@ -1,19 +1,15 @@
 package opencode.examples.plainjava;
 
-import java.util.List;
-
-import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.api.SessionApi;
+import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.config.OpenCodeConfig;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
-import opencode.sdk.model.Session;
-import opencode.sdk.model.SessionCreateRequest;
-import opencode.sdk.model.SessionForkRequest;
-import opencode.sdk.model.SessionRevertRequest;
-import opencode.sdk.model.SessionSummarizeRequest;
+import opencode.sdk.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class SessionAdvancedExample {
 
@@ -79,9 +75,9 @@ public class SessionAdvancedExample {
         request.setTitle(title);
 
         Session session = client.api().sessionCreate(
-            null,
-            null,
-            request
+                null,
+                null,
+                request
         );
 
         logger.info("Session created successfully");
@@ -95,10 +91,10 @@ public class SessionAdvancedExample {
         request.setMessageID(null);
 
         Session forkedSession = client.api().sessionFork(
-            sessionId,
-            null,
-            null,
-            request
+                sessionId,
+                null,
+                null,
+                request
         );
 
         logger.info("Session forked successfully. New session ID: {}", forkedSession.getId());
@@ -115,14 +111,14 @@ public class SessionAdvancedExample {
         logger.info("  Directory: {}", session.getDirectory());
         if (session.getTime() != null) {
             logger.info("  Time: created={}, updated={}",
-                session.getTime().getCreated(),
-                session.getTime().getUpdated());
+                    session.getTime().getCreated(),
+                    session.getTime().getUpdated());
         }
         if (session.getSummary() != null) {
             logger.info("  Summary: additions={}, deletions={}, files={}",
-                session.getSummary().getAdditions(),
-                session.getSummary().getDeletions(),
-                session.getSummary().getFiles());
+                    session.getSummary().getAdditions(),
+                    session.getSummary().getDeletions(),
+                    session.getSummary().getFiles());
         }
     }
 
@@ -145,9 +141,9 @@ public class SessionAdvancedExample {
         logger.info("\n--- Sharing Session: {} ---", sessionId);
 
         Session session = client.api().sessionShare(
-            sessionId,
-            null,
-            null
+                sessionId,
+                null,
+                null
         );
 
         if (session.getShare() != null) {
@@ -161,9 +157,9 @@ public class SessionAdvancedExample {
         logger.info("\n--- Unsharing Session: {} ---", sessionId);
 
         Session session = client.api().sessionUnshare(
-            sessionId,
-            null,
-            null
+                sessionId,
+                null,
+                null
         );
 
         logger.info("Session unshared successfully");
@@ -178,10 +174,10 @@ public class SessionAdvancedExample {
         request.setAuto(true);
 
         Boolean result = client.api().sessionSummarize(
-            sessionId,
-            null,
-            null,
-            request
+                sessionId,
+                null,
+                null,
+                request
         );
 
         if (result) {
@@ -195,9 +191,9 @@ public class SessionAdvancedExample {
         logger.info("\n--- Aborting Session Processing: {} ---", sessionId);
 
         Boolean result = client.api().sessionAbort(
-            sessionId,
-            null,
-            null
+                sessionId,
+                null,
+                null
         );
 
         if (result) {
@@ -215,10 +211,10 @@ public class SessionAdvancedExample {
         request.setPartID(null);
 
         Session session = client.api().sessionRevert(
-            sessionId,
-            null,
-            null,
-            request
+                sessionId,
+                null,
+                null,
+                request
         );
 
         logger.info("Session reverted successfully");
@@ -228,9 +224,9 @@ public class SessionAdvancedExample {
         logger.info("\n--- Unreverting Session: {} ---", sessionId);
 
         Session session = client.api().sessionUnrevert(
-            sessionId,
-            null,
-            null
+                sessionId,
+                null,
+                null
         );
 
         logger.info("Session unreverted successfully");

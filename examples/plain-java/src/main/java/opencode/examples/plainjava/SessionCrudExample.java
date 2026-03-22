@@ -1,7 +1,7 @@
 package opencode.examples.plainjava;
 
-import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.api.SessionApi;
+import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.invoker.ApiClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Session;
@@ -63,12 +63,12 @@ public class SessionCrudExample {
         logger.info("\n--- Listing Sessions ---");
 
         List<Session> sessions = client.api().sessionList(
-            null,  // directory
-            null,  // workspace
-            null,  // roots - only root sessions
-            null,  // start - filter by timestamp
-            null,  // search - filter by title
-            new BigDecimal("10")  // limit - max 10 sessions
+                null,  // directory
+                null,  // workspace
+                null,  // roots - only root sessions
+                null,  // start - filter by timestamp
+                null,  // search - filter by title
+                new BigDecimal("10")  // limit - max 10 sessions
         );
 
         logger.info("Found {} sessions:", sessions.size());
@@ -86,9 +86,9 @@ public class SessionCrudExample {
         request.setTitle(title);
 
         Session session = client.api().sessionCreate(
-            null,  // directory
-            null,  // workspace
-            request
+                null,  // directory
+                null,  // workspace
+                request
         );
 
         logger.info("Session created successfully");
@@ -99,9 +99,9 @@ public class SessionCrudExample {
         logger.info("\n--- Getting Session by ID: {} ---", sessionId);
 
         Session session = sessionApi.sessionGet(
-            sessionId,
-            null,  // directory
-            null   // workspace
+                sessionId,
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Session Details:");
@@ -119,10 +119,10 @@ public class SessionCrudExample {
         request.setTitle(newTitle);
 
         client.api().sessionUpdate(
-            sessionId,
-            null,  // directory
-            null,  // workspace
-            request
+                sessionId,
+                null,  // directory
+                null,  // workspace
+                request
         );
 
         logger.info("Session updated successfully to: {}", newTitle);
@@ -132,9 +132,9 @@ public class SessionCrudExample {
         logger.info("\n--- Deleting Session: {} ---", sessionId);
 
         Boolean result = client.api().sessionDelete(
-            sessionId,
-            null,  // directory
-            null   // workspace
+                sessionId,
+                null,  // directory
+                null   // workspace
         );
 
         if (result) {

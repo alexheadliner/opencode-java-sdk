@@ -55,14 +55,14 @@ public class ExperimentalExample {
         logger.info("\n--- Listing Global Sessions ---");
 
         List<GlobalSession> sessions = client.api().experimentalSessionList(
-            null,  // directory
-            null,  // workspace
-            null,  // roots
-            null,  // start
-            null,  // cursor
-            null,  // search
-            new BigDecimal("10"),  // limit
-            null   // archived
+                null,  // directory
+                null,  // workspace
+                null,  // roots
+                null,  // start
+                null,  // cursor
+                null,  // search
+                new BigDecimal("10"),  // limit
+                null   // archived
         );
 
         logger.info("Found {} global sessions:", sessions.size());
@@ -77,8 +77,8 @@ public class ExperimentalExample {
         logger.info("\n--- Listing Workspaces ---");
 
         List<Workspace> workspaces = client.api().experimentalWorkspaceList(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Found {} workspaces:", workspaces.size());
@@ -97,9 +97,9 @@ public class ExperimentalExample {
         request.setBranch("main");
 
         Workspace workspace = client.api().experimentalWorkspaceCreate(
-            null,  // directory
-            null,  // workspace
-            request
+                null,  // directory
+                null,  // workspace
+                request
         );
 
         logger.info("Workspace created successfully:");
@@ -114,8 +114,8 @@ public class ExperimentalExample {
         logger.info("\n--- Listing MCP Resources ---");
 
         Map<String, McpResource> resources = client.api().experimentalResourceList(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Found {} MCP resources:", resources.size());

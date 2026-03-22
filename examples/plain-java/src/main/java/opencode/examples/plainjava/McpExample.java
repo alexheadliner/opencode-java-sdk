@@ -3,16 +3,10 @@ package opencode.examples.plainjava;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.config.OpenCodeConfig;
 import opencode.sdk.invoker.ApiException;
-import opencode.sdk.model.McpAddRequest;
-import opencode.sdk.model.McpAddRequestConfig;
-import opencode.sdk.model.McpLocalConfig;
-import opencode.sdk.model.McpResource;
-import opencode.sdk.model.MCPStatus;
-import opencode.sdk.model.McpAuthStart200Response;
+import opencode.sdk.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -59,8 +53,8 @@ public class McpExample {
         logger.info("\n--- Getting MCP Status ---");
 
         Map<String, MCPStatus> statusMap = client.api().mcpStatus(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         if (statusMap == null || statusMap.isEmpty()) {
@@ -97,9 +91,9 @@ public class McpExample {
         request.setConfig(config);
 
         Map<String, MCPStatus> result = client.api().mcpAdd(
-            null,    // directory
-            null,    // workspace
-            request
+                null,    // directory
+                null,    // workspace
+                request
         );
 
         if (result != null) {
@@ -116,9 +110,9 @@ public class McpExample {
         logger.info("\n--- Connecting to MCP Server: {} ---", name);
 
         Boolean result = client.api().mcpConnect(
-            name,    // server name
-            null,    // directory
-            null     // workspace
+                name,    // server name
+                null,    // directory
+                null     // workspace
         );
 
         if (result != null && result) {
@@ -132,8 +126,8 @@ public class McpExample {
         logger.info("\n--- Listing MCP Resources ---");
 
         Map<String, McpResource> resources = client.api().experimentalResourceList(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         if (resources == null || resources.isEmpty()) {
@@ -160,9 +154,9 @@ public class McpExample {
 
         try {
             McpAuthStart200Response response = client.api().mcpAuthStart(
-                name,    // server name
-                null,    // directory
-                null     // workspace
+                    name,    // server name
+                    null,    // directory
+                    null     // workspace
             );
 
             if (response != null) {

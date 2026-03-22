@@ -61,8 +61,8 @@ public class SystemInfoExample {
         logger.info("\n--- Listing Agents ---");
 
         List<Agent> agents = client.api().appAgents(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Found {} agents:", agents.size());
@@ -82,8 +82,8 @@ public class SystemInfoExample {
         logger.info("\n--- Listing Skills ---");
 
         List<AppSkills200ResponseInner> skills = client.api().appSkills(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Found {} skills:", skills.size());
@@ -98,8 +98,8 @@ public class SystemInfoExample {
         logger.info("\n--- Listing Commands ---");
 
         List<Command> commands = client.api().commandList(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Found {} commands:", commands.size());

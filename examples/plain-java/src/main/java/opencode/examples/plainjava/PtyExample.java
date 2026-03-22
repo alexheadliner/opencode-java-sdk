@@ -1,8 +1,5 @@
 package opencode.examples.plainjava;
 
-import java.math.BigDecimal;
-import java.util.List;
-
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.config.OpenCodeConfig;
 import opencode.sdk.invoker.ApiException;
@@ -12,6 +9,9 @@ import opencode.sdk.model.PtyUpdateRequest;
 import opencode.sdk.model.PtyUpdateRequestSize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 public class PtyExample {
 
@@ -64,8 +64,8 @@ public class PtyExample {
         logger.info("\n--- Listing PTY Sessions ---");
 
         List<Pty> ptys = client.api().ptyList(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Found {} PTY sessions:", ptys.size());
@@ -87,9 +87,9 @@ public class PtyExample {
         request.setCwd(System.getProperty("user.dir"));
 
         Pty pty = client.api().ptyCreate(
-            null,     // directory
-            null,     // workspace
-            request
+                null,     // directory
+                null,     // workspace
+                request
         );
 
         logger.info("PTY session created successfully:");
@@ -108,9 +108,9 @@ public class PtyExample {
         logger.info("\n--- Getting PTY Details: {} ---", ptyId);
 
         Pty pty = client.api().ptyGet(
-            ptyId,
-            null,  // directory
-            null   // workspace
+                ptyId,
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("PTY details retrieved:");
@@ -130,10 +130,10 @@ public class PtyExample {
         request.setSize(size);
 
         Pty pty = client.api().ptyUpdate(
-            ptyId,
-            null,     // directory
-            null,     // workspace
-            request
+                ptyId,
+                null,     // directory
+                null,     // workspace
+                request
         );
 
         logger.info("PTY resized successfully:");
@@ -148,10 +148,10 @@ public class PtyExample {
         request.setTitle(title);
 
         Pty pty = client.api().ptyUpdate(
-            ptyId,
-            null,     // directory
-            null,     // workspace
-            request
+                ptyId,
+                null,     // directory
+                null,     // workspace
+                request
         );
 
         logger.info("PTY title updated successfully:");
@@ -163,9 +163,9 @@ public class PtyExample {
         logger.info("\n--- Removing PTY Session: {} ---", ptyId);
 
         Boolean result = client.api().ptyRemove(
-            ptyId,
-            null,  // directory
-            null   // workspace
+                ptyId,
+                null,  // directory
+                null   // workspace
         );
 
         if (result) {

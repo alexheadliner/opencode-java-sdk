@@ -1,7 +1,7 @@
 package opencode.examples.plainjava;
 
-import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.api.DefaultApi;
+import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.Session;
 import opencode.sdk.model.Todo;
@@ -29,12 +29,12 @@ public class TodoExample {
             // First, we need a session to get todos from
             // List available sessions to find one with potential todos
             List<Session> sessions = api.sessionList(
-                null,  // directory
-                null,  // workspace
-                null,  // roots
-                null,  // start
-                null,  // search
-                null   // limit
+                    null,  // directory
+                    null,  // workspace
+                    null,  // roots
+                    null,  // start
+                    null,  // search
+                    null   // limit
             );
 
             if (sessions.isEmpty()) {
@@ -63,9 +63,9 @@ public class TodoExample {
         logger.info("\n--- Listing Todos for Session: {} ---", sessionId);
 
         List<Todo> todos = api.sessionTodo(
-            sessionId,
-            null,  // directory
-            null   // workspace
+                sessionId,
+                null,  // directory
+                null   // workspace
         );
 
         if (todos == null || todos.isEmpty()) {

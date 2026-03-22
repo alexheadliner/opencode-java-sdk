@@ -54,8 +54,8 @@ public class VcsExample {
         logger.info("\n--- Getting VCS Info ---");
 
         VcsInfo vcsInfo = client.api().vcsGet(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("VCS Info retrieved successfully:");
@@ -66,8 +66,8 @@ public class VcsExample {
         logger.info("\n--- Listing Worktrees ---");
 
         List<String> worktrees = client.api().worktreeList(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Found {} worktrees:", worktrees.size());
@@ -84,9 +84,9 @@ public class VcsExample {
         // startCommand is optional - leaving it null
 
         Worktree worktree = client.api().worktreeCreate(
-            null,   // directory
-            null,   // workspace
-            input
+                null,   // directory
+                null,   // workspace
+                input
         );
 
         logger.info("Worktree created successfully:");
@@ -104,9 +104,9 @@ public class VcsExample {
         input.setDirectory(directory);
 
         Boolean result = client.api().worktreeRemove(
-            null,   // directory
-            null,   // workspace
-            input
+                null,   // directory
+                null,   // workspace
+                input
         );
 
         if (result) {

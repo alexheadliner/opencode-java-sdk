@@ -48,8 +48,8 @@ public class ProjectExample {
         logger.info("\n--- Listing All Projects ---");
 
         List<Project> projects = client.api().projectList(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Found {} project(s):", projects.size());
@@ -75,8 +75,8 @@ public class ProjectExample {
         logger.info("\n--- Retrieving Current Project ---");
 
         Project project = client.api().projectCurrent(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Current project retrieved successfully!");
@@ -106,10 +106,10 @@ public class ProjectExample {
         updateRequest.setName("Updated Project Name");
 
         Project updatedProject = client.api().projectUpdate(
-            projectId,      // projectID (required)
-            null,           // directory
-            null,           // workspace
-            updateRequest   // update request
+                projectId,      // projectID (required)
+                null,           // directory
+                null,           // workspace
+                updateRequest   // update request
         );
 
         logger.info("Project updated successfully!");

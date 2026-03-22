@@ -2,16 +2,7 @@ package opencode.examples.plainjava;
 
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.invoker.ApiException;
-import opencode.sdk.model.Session;
-import opencode.sdk.model.SessionCreateRequest;
-import opencode.sdk.model.SessionPromptRequest;
-import opencode.sdk.model.SessionPrompt200Response;
-import opencode.sdk.model.SessionMessages200ResponseInner;
-import opencode.sdk.model.SessionPromptRequestPartsInner;
-import opencode.sdk.model.TextPartInput;
-import opencode.sdk.model.TextPart;
-import opencode.sdk.model.Part;
-import opencode.sdk.model.Message;
+import opencode.sdk.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,9 +54,9 @@ public class MessageExample {
         request.setTitle("Java Q&A Session");
 
         Session session = client.api().sessionCreate(
-            null,  // directory
-            null,  // workspace
-            request
+                null,  // directory
+                null,  // workspace
+                request
         );
 
         logger.info("Session created for messaging: {}", session.getId());
@@ -81,10 +72,10 @@ public class MessageExample {
 
         // Send the prompt and get AI response
         SessionPrompt200Response response = client.api().sessionPrompt(
-            sessionId,
-            null,  // directory
-            null,  // workspace
-            request
+                sessionId,
+                null,  // directory
+                null,  // workspace
+                request
         );
 
         // Log the AI's response
@@ -103,22 +94,22 @@ public class MessageExample {
         logger.info("\n--- Listing Messages in Session ---");
 
         List<SessionMessages200ResponseInner> messages = client.api().sessionMessages(
-            sessionId,
-            null,   // directory
-            null,   // workspace
-            new BigDecimal("20")  // limit - last 20 messages
+                sessionId,
+                null,   // directory
+                null,   // workspace
+                new BigDecimal("20")  // limit - last 20 messages
         );
 
         logger.info("Total messages in session: {}", messages.size());
-        
+
         int messageNum = 1;
         for (SessionMessages200ResponseInner message : messages) {
             logger.info("Message {}:", messageNum++);
-            
+
             Message info = message.getInfo();
             String role = info != null ? "user" : "unknown";
             String content = extractTextFromParts(message.getParts());
-            
+
             logger.info("  Role: {}, Content: {}", role, content);
         }
     }

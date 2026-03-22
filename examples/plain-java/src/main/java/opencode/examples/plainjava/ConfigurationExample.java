@@ -52,8 +52,8 @@ public class ConfigurationExample {
         logger.info("\n--- Retrieving Project Configuration ---");
 
         Config config = client.api().configGet(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Project config retrieved successfully!");
@@ -98,8 +98,8 @@ public class ConfigurationExample {
         logger.info("\n--- Listing Configuration Providers ---");
 
         ConfigProviders200Response response = client.api().configProviders(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         List<Provider> providers = response.getProviders();
@@ -132,9 +132,9 @@ public class ConfigurationExample {
         configUpdate.setLogLevel(LogLevel.DEBUG);
 
         Config updatedConfig = client.api().configUpdate(
-            null,           // directory
-            null,           // workspace
-            configUpdate    // config changes
+                null,           // directory
+                null,           // workspace
+                configUpdate    // config changes
         );
 
         logger.info("Config updated successfully!");

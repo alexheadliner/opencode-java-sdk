@@ -45,8 +45,8 @@ public class ProviderExample {
         logger.info("\n--- Listing AI Providers ---");
 
         ProviderList200Response response = client.api().providerList(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         List<ProviderList200ResponseAllInner> allProviders = response.getAll();
@@ -83,8 +83,8 @@ public class ProviderExample {
         logger.info("\n--- Getting Provider Auth Methods ---");
 
         Map<String, List<ProviderAuthMethod>> authMethods = client.api().providerAuth(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         if (authMethods.isEmpty()) {

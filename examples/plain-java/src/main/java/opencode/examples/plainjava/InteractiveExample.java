@@ -1,18 +1,14 @@
 package opencode.examples.plainjava;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.config.OpenCodeConfig;
 import opencode.sdk.invoker.ApiException;
-import opencode.sdk.model.PermissionReplyRequest;
-import opencode.sdk.model.PermissionRequest;
-import opencode.sdk.model.QuestionReplyRequest;
-import opencode.sdk.model.QuestionRequest;
-import opencode.sdk.model.ToolListItem;
+import opencode.sdk.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class InteractiveExample {
 
@@ -39,7 +35,7 @@ public class InteractiveExample {
             // First get available tool IDs
             List<String> toolIds = client.api().toolIds(null, null);
             logger.info("Available tool IDs count: {}", toolIds.size());
-            
+
             if (!toolIds.isEmpty()) {
                 logger.info("Sample tool IDs (first 5):");
                 toolIds.stream().limit(5).forEach(id -> logger.info("  - {}", id));
@@ -52,7 +48,7 @@ public class InteractiveExample {
                 List<ToolListItem> tools = client.api().toolList("zai", "glm-4.7", null, null);
                 logger.info("\nDetailed tool list (provider=zai, model=glm-4.7):");
                 logger.info("  Tools count: {}", tools.size());
-                
+
                 if (!tools.isEmpty()) {
                     logger.info("  Sample tools (first 3):");
                     tools.stream().limit(3).forEach(tool -> {
@@ -61,8 +57,8 @@ public class InteractiveExample {
                     });
                 }
             } catch (ApiException e) {
-                logger.warn("Could not fetch detailed tool list (provider/model may not be available): {} - {}", 
-                    e.getCode(), e.getMessage());
+                logger.warn("Could not fetch detailed tool list (provider/model may not be available): {} - {}",
+                        e.getCode(), e.getMessage());
             }
 
         } catch (ApiException e) {
@@ -87,9 +83,9 @@ public class InteractiveExample {
                         logger.info("    Questions count: {}", question.getQuestions().size());
                     }
                     if (question.getTool() != null) {
-                        logger.info("    Tool - MessageID: {}, CallID: {}", 
-                            question.getTool().getMessageID(), 
-                            question.getTool().getCallID());
+                        logger.info("    Tool - MessageID: {}, CallID: {}",
+                                question.getTool().getMessageID(),
+                                question.getTool().getCallID());
                     }
                 }
 
@@ -159,9 +155,9 @@ public class InteractiveExample {
                         logger.info("    Patterns: {}", permission.getPatterns());
                     }
                     if (permission.getTool() != null) {
-                        logger.info("    Tool - MessageID: {}, CallID: {}", 
-                            permission.getTool().getMessageID(), 
-                            permission.getTool().getCallID());
+                        logger.info("    Tool - MessageID: {}, CallID: {}",
+                                permission.getTool().getMessageID(),
+                                permission.getTool().getCallID());
                     }
                 }
 

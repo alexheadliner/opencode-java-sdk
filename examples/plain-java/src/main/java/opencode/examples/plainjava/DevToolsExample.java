@@ -43,8 +43,8 @@ public class DevToolsExample {
         logger.info("\n--- Getting LSP Server Status ---");
 
         List<LSPStatus> lspStatuses = client.api().lspStatus(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Found {} LSP server(s):", lspStatuses.size());
@@ -60,8 +60,8 @@ public class DevToolsExample {
         logger.info("\n--- Getting Formatter Status ---");
 
         List<FormatterStatus> formatterStatuses = client.api().formatterStatus(
-            null,  // directory
-            null   // workspace
+                null,  // directory
+                null   // workspace
         );
 
         logger.info("Found {} formatter(s):", formatterStatuses.size());
