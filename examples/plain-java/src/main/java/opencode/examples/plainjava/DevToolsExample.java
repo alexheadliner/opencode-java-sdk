@@ -1,0 +1,103 @@
+package opencode.examples.plainjava;
+
+import opencode.sdk.client.OpenCodeClient;
+import opencode.sdk.config.OpenCodeConfig;
+import opencode.sdk.invoker.ApiException;
+import opencode.sdk.model.FormatterStatus;
+import opencode.sdk.model.LSPStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
+public class DevToolsExample {
+
+    private static final Logger logger = LoggerFactory.getLogger(DevToolsExample.class);
+
+    private final OpenCodeClient client;
+
+    public DevToolsExample(OpenCodeClient client) {
+        this.client = client;
+    }
+
+    public void demonstrateDevTools() {
+        try {
+            logger.info("=== DevTools Example ===");
+
+            // Get LSP server status
+            getLspStatus();
+
+            // Get formatter status
+            getFormatterStatus();
+
+            logger.info("=== DevTools Example Completed Successfully ===");
+
+        } catch (ApiException e) {
+            logger.error("API Error during DevTools operations: {} - {}", e.getCode(), e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error("Unexpected error during DevTools operations: {}", e.getMessage(), e);
+        }
+    }
+
+    private void getLspStatus() throws ApiException {
+        logger.info("\n--- Getting LSP Server Status ---");
+
+        List<LSPStatus> lspStatuses = client.api().lspStatus(
+            null,  // directory
+            null   // workspace
+        );
+
+        logger.info("Found {} LSP server(s):", lspStatuses.size());
+        for (LSPStatus status : lspStatuses) {
+            logger.info("  - ID: {}", status.getId());
+            logger.info("    Name: {}", status.getName());
+            logger.info("    Root: {}", status.getRoot());
+            logger.info("    Status: {}", status.getStatus());
+        }
+    }
+
+    private void getFormatterStatus() throws ApiException {
+        logger.info("\n--- Getting Formatter Status ---");
+
+        List<FormatterStatus> formatterStatuses = client.api().formatterStatus(
+            null,  // directory
+            null   // workspace
+        );
+
+        logger.info("Found {} formatter(s):", formatterStatuses.size());
+        for (FormatterStatus status : formatterStatuses) {
+            logger.info("  - Name: {}", status.getName());
+            logger.info("    Extensions: {}", status.getExtensions());
+            logger.info("    Enabled: {}", status.getEnabled());
+        }
+    }
+
+    public static void main(String[] args) {
+        logger.info("Starting DevTools Example");
+        logger.info("=========================");
+
+        // Configure the client with Basic Auth
+        OpenCodeConfig config = new OpenCodeConfig();
+        config.setBaseUrl("http://localhost:4096");
+        config.setUsername("opencode");
+        config.setPassword("opencode123");
+
+        // Create the client
+        OpenCodeClient client = new OpenCodeClient(config);
+
+        try {
+            // Run the example
+            DevToolsExample example = new DevToolsExample(client);
+            example.demonstrateDevTools();
+
+            logger.info("\n");
+            logger.info("=========================");
+            logger.info("Example completed successfully!");
+
+        } catch (Exception e) {
+            logger.error("Error running example: {}", e.getMessage(), e);
+            System.err.println("Fatal error: " + e.getMessage());
+            System.exit(1);
+        }
+    }
+}

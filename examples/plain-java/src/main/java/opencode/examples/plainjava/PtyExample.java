@@ -1,0 +1,206 @@
+package opencode.examples.plainjava;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import opencode.sdk.client.OpenCodeClient;
+import opencode.sdk.config.OpenCodeConfig;
+import opencode.sdk.invoker.ApiException;
+import opencode.sdk.model.Pty;
+import opencode.sdk.model.PtyCreateRequest;
+import opencode.sdk.model.PtyUpdateRequest;
+import opencode.sdk.model.PtyUpdateRequestSize;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class PtyExample {
+
+    private static final Logger logger = LoggerFactory.getLogger(PtyExample.class);
+
+    private final OpenCodeClient client;
+
+    public PtyExample(OpenCodeClient client) {
+        this.client = client;
+    }
+
+    public void demonstratePtyOperations() {
+        try {
+            logger.info("=== PTY (Pseudo-Terminal) Example ===");
+
+            // List existing PTY sessions
+            listPtySessions();
+
+            // Create a new PTY session
+            Pty pty = createPtySession();
+            if (pty != null) {
+                String ptyId = pty.getId();
+
+                // Get PTY details
+                getPty(ptyId);
+
+                // Resize the PTY terminal
+                resizePty(ptyId, 40, 120);
+
+                // Update PTY title
+                updatePtyTitle(ptyId, "Updated PTY Session");
+
+                // List PTY sessions again to see our new session
+                listPtySessions();
+
+                // Remove (kill) the PTY session
+                removePty(ptyId);
+            }
+
+            logger.info("=== PTY Example Completed Successfully ===");
+
+        } catch (ApiException e) {
+            logger.error("API Error during PTY operations: {} - {}", e.getCode(), e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error("Unexpected error during PTY operations: {}", e.getMessage(), e);
+        }
+    }
+
+    private void listPtySessions() throws ApiException {
+        logger.info("\n--- Listing PTY Sessions ---");
+
+        List<Pty> ptys = client.api().ptyList(
+            null,  // directory
+            null   // workspace
+        );
+
+        logger.info("Found {} PTY sessions:", ptys.size());
+        for (Pty pty : ptys) {
+            logger.info("  - ID: {}", pty.getId());
+            logger.info("    Title: {}", pty.getTitle());
+            logger.info("    Command: {}", pty.getCommand());
+            logger.info("    Status: {}", pty.getStatus());
+            logger.info("    PID: {}", pty.getPid());
+        }
+    }
+
+    private Pty createPtySession() throws ApiException {
+        logger.info("\n--- Creating PTY Session ---");
+
+        PtyCreateRequest request = new PtyCreateRequest();
+        request.setCommand("bash");
+        request.setTitle("Example PTY Session");
+        request.setCwd(System.getProperty("user.dir"));
+
+        Pty pty = client.api().ptyCreate(
+            null,     // directory
+            null,     // workspace
+            request
+        );
+
+        logger.info("PTY session created successfully:");
+        logger.info("  ID: {}", pty.getId());
+        logger.info("  Title: {}", pty.getTitle());
+        logger.info("  Command: {}", pty.getCommand());
+        logger.info("  Args: {}", pty.getArgs());
+        logger.info("  CWD: {}", pty.getCwd());
+        logger.info("  Status: {}", pty.getStatus());
+        logger.info("  PID: {}", pty.getPid());
+
+        return pty;
+    }
+
+    private void getPty(String ptyId) throws ApiException {
+        logger.info("\n--- Getting PTY Details: {} ---", ptyId);
+
+        Pty pty = client.api().ptyGet(
+            ptyId,
+            null,  // directory
+            null   // workspace
+        );
+
+        logger.info("PTY details retrieved:");
+        logger.info("  ID: {}", pty.getId());
+        logger.info("  Title: {}", pty.getTitle());
+        logger.info("  Status: {}", pty.getStatus());
+    }
+
+    private void resizePty(String ptyId, int rows, int cols) throws ApiException {
+        logger.info("\n--- Resizing PTY: {} to {}x{} ---", ptyId, rows, cols);
+
+        PtyUpdateRequestSize size = new PtyUpdateRequestSize();
+        size.setRows(BigDecimal.valueOf(rows));
+        size.setCols(BigDecimal.valueOf(cols));
+
+        PtyUpdateRequest request = new PtyUpdateRequest();
+        request.setSize(size);
+
+        Pty pty = client.api().ptyUpdate(
+            ptyId,
+            null,     // directory
+            null,     // workspace
+            request
+        );
+
+        logger.info("PTY resized successfully:");
+        logger.info("  ID: {}", pty.getId());
+        logger.info("  Title: {}", pty.getTitle());
+    }
+
+    private void updatePtyTitle(String ptyId, String title) throws ApiException {
+        logger.info("\n--- Updating PTY Title: {} ---", ptyId);
+
+        PtyUpdateRequest request = new PtyUpdateRequest();
+        request.setTitle(title);
+
+        Pty pty = client.api().ptyUpdate(
+            ptyId,
+            null,     // directory
+            null,     // workspace
+            request
+        );
+
+        logger.info("PTY title updated successfully:");
+        logger.info("  ID: {}", pty.getId());
+        logger.info("  New Title: {}", pty.getTitle());
+    }
+
+    private void removePty(String ptyId) throws ApiException {
+        logger.info("\n--- Removing PTY Session: {} ---", ptyId);
+
+        Boolean result = client.api().ptyRemove(
+            ptyId,
+            null,  // directory
+            null   // workspace
+        );
+
+        if (result) {
+            logger.info("PTY session removed successfully");
+        } else {
+            logger.warn("PTY removal returned false");
+        }
+    }
+
+    public static void main(String[] args) {
+        logger.info("Starting PTY Example");
+        logger.info("====================");
+
+        // Configure the client with Basic Auth
+        OpenCodeConfig config = new OpenCodeConfig();
+        config.setBaseUrl("http://localhost:4096");
+        config.setUsername("opencode");
+        config.setPassword("opencode123");
+
+        // Create the client
+        OpenCodeClient client = new OpenCodeClient(config);
+
+        try {
+            // Run the example
+            PtyExample example = new PtyExample(client);
+            example.demonstratePtyOperations();
+
+            logger.info("\n");
+            logger.info("====================");
+            logger.info("Example completed successfully!");
+
+        } catch (Exception e) {
+            logger.error("Error running example: {}", e.getMessage(), e);
+            System.err.println("Fatal error: " + e.getMessage());
+            System.exit(1);
+        }
+    }
+}

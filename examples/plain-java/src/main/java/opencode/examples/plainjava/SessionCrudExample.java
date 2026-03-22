@@ -143,4 +143,36 @@ public class SessionCrudExample {
             logger.warn("Session deletion returned false");
         }
     }
+
+    public static void main(String[] args) {
+        logger.info("Starting Session CRUD Example");
+
+        // Configure the client with Basic Auth
+        opencode.sdk.config.OpenCodeConfig config = new opencode.sdk.config.OpenCodeConfig();
+        config.setBaseUrl("http://localhost:4096");
+        config.setUsername("opencode");
+        config.setPassword("opencode123");
+
+        // Create the client
+        OpenCodeClient client = new OpenCodeClient(config);
+
+        try {
+            // Verify connection with health check
+            var health = client.api().globalHealth();
+            logger.info("Connected to OpenCode server (version: {})", health.getVersion());
+
+            // Run the example
+            SessionCrudExample example = new SessionCrudExample(client);
+            example.demonstrateSessionCrud();
+
+            logger.info("Session CRUD Example completed");
+
+        } catch (ApiException e) {
+            logger.error("Failed to connect to OpenCode server: {}", e.getMessage());
+            System.exit(1);
+        } catch (Exception e) {
+            logger.error("Unexpected error: {}", e.getMessage(), e);
+            System.exit(1);
+        }
+    }
 }
