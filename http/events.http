@@ -1,0 +1,27 @@
+### Event Streaming API Tests
+### Tests for EventStreamingController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+### Note: These endpoints use Server-Sent Events (SSE)
+
+### Subscribe to session events
+### Opens an SSE connection to receive session-specific events
+### Note: This is an SSE endpoint - connection stays open
+### Events include: session status, message updates, tool executions, etc.
+GET http://localhost:8080/api/events
+Accept: text/event-stream
+Cache-Control: no-cache
+Connection: keep-alive
+
+###
+
+### Subscribe to global events
+### Opens an SSE connection to receive global/project-wide events
+### Note: This is an SSE endpoint - connection stays open
+### Events include: project updates, file changes, VCS changes, etc.
+GET http://localhost:8080/api/events/global
+Accept: text/event-stream
+Cache-Control: no-cache
+Connection: keep-alive
+
+###

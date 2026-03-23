@@ -1,0 +1,86 @@
+### Session Advanced API Tests
+### Tests for SessionAdvancedController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### Fork a session
+### Creates a copy of an existing session at a specific point
+# @prompt sessionId Replace with actual session ID
+POST http://localhost:8080/api/sessions/advanced/{{sessionId}}/fork
+Content-Type: application/json
+
+{
+  "message_id": "message_uuid_to_fork_from"
+}
+
+###
+
+### Revert session to previous state
+### Reverts a session to a specific message or state
+# @prompt sessionId Replace with actual session ID
+POST http://localhost:8080/api/sessions/advanced/{{sessionId}}/revert
+Content-Type: application/json
+
+{
+  "message_id": "message_uuid_to_revert_to"
+}
+
+###
+
+### Get session share link
+### Generates a shareable link for the session
+# @prompt sessionId Replace with actual session ID
+GET http://localhost:8080/api/sessions/advanced/{{sessionId}}/share
+Content-Type: application/json
+
+###
+
+### Summarize session
+### Generates a summary of the session conversation
+# @prompt sessionId Replace with actual session ID
+POST http://localhost:8080/api/sessions/advanced/{{sessionId}}/summarize
+Content-Type: application/json
+
+{
+  "message_id": "optional_message_id_to_summarize_from"
+}
+
+###
+
+### Get session children
+### Returns child sessions forked from this session
+# @prompt sessionId Replace with actual session ID
+GET http://localhost:8080/api/sessions/advanced/{{sessionId}}/children
+Content-Type: application/json
+
+###
+
+### Execute command in session
+### Executes a command within the session context
+# @prompt sessionId Replace with actual session ID
+POST http://localhost:8080/api/sessions/advanced/{{sessionId}}/command
+Content-Type: application/json
+
+{
+  "command": "build",
+  "parts": [
+    {
+      "type": "text",
+      "text": "Run the build command"
+    }
+  ]
+}
+
+###
+
+### Execute shell command in session
+### Executes a shell command within the session
+# @prompt sessionId Replace with actual session ID
+POST http://localhost:8080/api/sessions/advanced/{{sessionId}}/shell
+Content-Type: application/json
+
+{
+  "command": "ls -la"
+}
+
+###

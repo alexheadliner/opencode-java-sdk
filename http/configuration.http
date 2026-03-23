@@ -1,0 +1,39 @@
+### Configuration API Tests
+### Tests for ConfigurationController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### Get project configuration
+### Returns the current project configuration settings
+GET http://localhost:8080/api/config/project
+Content-Type: application/json
+
+###
+
+### Update project configuration
+### Patch update for project configuration settings
+PATCH http://localhost:8080/api/config/project
+Content-Type: application/json
+
+{
+  "agent": {
+    "name": "opencode"
+  },
+  "model": "glm-4.7"
+}
+
+###
+
+### Get global configuration
+### Returns global OpenCode server configuration
+GET http://localhost:8080/api/config/global
+Content-Type: application/json
+
+###
+
+### Get available providers configuration
+### Returns list of available AI providers and their configurations
+GET http://localhost:8080/api/config/providers
+Content-Type: application/json
+
+###

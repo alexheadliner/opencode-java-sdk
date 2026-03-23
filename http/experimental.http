@@ -1,0 +1,46 @@
+### Experimental API Tests
+### Tests for ExperimentalController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### Create workspace
+### Creates a new experimental workspace
+POST http://localhost:8080/api/experimental/workspace
+Content-Type: application/json
+
+{
+  "name": "my-experimental-workspace",
+  "path": "/projects/my-project"
+}
+
+###
+
+### Get worktree info
+### Returns information about the current worktree
+GET http://localhost:8080/api/experimental/worktree
+Content-Type: application/json
+
+###
+
+### Create worktree
+### Creates a new git worktree
+POST http://localhost:8080/api/experimental/worktree
+Content-Type: application/json
+
+{
+  "branch": "feature/new-feature",
+  "path": "/projects/my-project-worktree"
+}
+
+###
+
+### Remove worktree
+### Removes an existing git worktree
+DELETE http://localhost:8080/api/experimental/worktree
+Content-Type: application/json
+
+{
+  "path": "/projects/my-project-worktree"
+}
+
+###

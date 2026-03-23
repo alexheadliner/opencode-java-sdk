@@ -1,0 +1,79 @@
+### Interactive API Tests
+### Tests for InteractiveController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### Get pending questions
+### Returns all pending questions that need user response
+GET http://localhost:8080/api/interactive/questions
+Content-Type: application/json
+
+###
+
+### Reply to a question
+### Sends a reply to a pending question
+POST http://localhost:8080/api/interactive/questions/reply
+Content-Type: application/json
+
+{
+  "question_id": "question_uuid",
+  "response": "Yes, proceed with the operation"
+}
+
+###
+
+### Reply to a question with option selection
+### Sends a reply selecting a specific option
+POST http://localhost:8080/api/interactive/questions/reply
+Content-Type: application/json
+
+{
+  "question_id": "question_uuid",
+  "option_id": "option_1"
+}
+
+###
+
+### Get pending permissions
+### Returns all pending permission requests
+GET http://localhost:8080/api/interactive/permissions
+Content-Type: application/json
+
+###
+
+### Reply to a permission request
+### Sends a reply to a pending permission request
+POST http://localhost:8080/api/interactive/permissions/reply
+Content-Type: application/json
+
+{
+  "permission_id": "permission_uuid",
+  "allow": true,
+  "remember": false
+}
+
+###
+
+### Respond to a permission request
+### Alternative endpoint for responding to permission requests
+POST http://localhost:8080/api/interactive/permissions/respond
+Content-Type: application/json
+
+{
+  "id": "permission_uuid",
+  "action": "allow"
+}
+
+###
+
+### Deny a permission request
+### Denies a pending permission request
+POST http://localhost:8080/api/interactive/permissions/respond
+Content-Type: application/json
+
+{
+  "id": "permission_uuid",
+  "action": "deny"
+}
+
+###

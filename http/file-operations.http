@@ -1,0 +1,60 @@
+### File Operations API Tests
+### Tests for FileOperationsController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### Get file tree
+### Returns hierarchical tree structure of project files
+GET http://localhost:8080/api/files/tree
+Content-Type: application/json
+
+###
+
+### Get file tree with path filter
+### Returns file tree starting from specified path
+GET http://localhost:8080/api/files/tree?path=src/main/java
+Content-Type: application/json
+
+###
+
+### Get file content
+### Returns content of a specific file
+GET http://localhost:8080/api/files/content?path=src/main/java/opencode/Main.java
+Content-Type: application/json
+
+###
+
+### Search in files
+### Search for text pattern in project files
+GET http://localhost:8080/api/files/search?pattern=OpenCode&path=src
+Content-Type: application/json
+
+###
+
+### Find files by name pattern
+### Find files matching a name pattern
+GET http://localhost:8080/api/files/find?pattern=*.java
+Content-Type: application/json
+
+###
+
+### Get file symbols
+### Returns code symbols (classes, methods, etc.) from a file
+GET http://localhost:8080/api/files/symbols?path=src/main/java/opencode/Main.java
+Content-Type: application/json
+
+###
+
+### Get file diff
+### Returns git diff for a file
+GET http://localhost:8080/api/files/diff?path=src/main/java/opencode/Main.java
+Content-Type: application/json
+
+###
+
+### Get file status
+### Returns git status for files in the project
+GET http://localhost:8080/api/files/status
+Content-Type: application/json
+
+###

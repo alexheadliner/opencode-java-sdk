@@ -1,0 +1,44 @@
+### Provider API Tests
+### Tests for ProviderController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### List all available providers
+### Returns list of all configured AI providers
+GET http://localhost:8080/api/providers
+Content-Type: application/json
+
+###
+
+### Get specific provider by name
+### Returns details for a specific AI provider
+# @prompt provider Replace with actual provider name (e.g., "zai", "openai")
+GET http://localhost:8080/api/providers/{{provider}}
+Content-Type: application/json
+
+###
+
+### Start OAuth authorization for provider
+### Initiates OAuth flow for provider authentication
+# @prompt provider Replace with actual provider name
+POST http://localhost:8080/api/providers/{{provider}}/oauth/authorize
+Content-Type: application/json
+
+{
+  "redirect_uri": "http://localhost:8080/callback"
+}
+
+###
+
+### Handle OAuth callback for provider
+### Completes OAuth flow with authorization code
+# @prompt provider Replace with actual provider name
+POST http://localhost:8080/api/providers/{{provider}}/oauth/callback
+Content-Type: application/json
+
+{
+  "code": "authorization_code_from_provider",
+  "state": "state_parameter"
+}
+
+###

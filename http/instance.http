@@ -1,0 +1,35 @@
+### Instance API Tests
+### Tests for InstanceController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### Get all instances
+### Returns a list of all server instances
+GET http://localhost:8080/api/instances/
+Content-Type: application/json
+
+###
+
+### Create new instance
+### Creates a new server instance
+### Note: This endpoint returns 501 (Not Implemented)
+POST http://localhost:8080/api/instances/
+Content-Type: application/json
+
+{
+  "name": "new-instance",
+  "config": {
+    "provider": "zai",
+    "model": "glm-4.7"
+  }
+}
+
+###
+
+### Delete instance
+### Deletes a specific server instance
+# @prompt instanceId Replace with actual instance ID
+DELETE http://localhost:8080/api/instances/{{instanceId}}
+Content-Type: application/json
+
+###

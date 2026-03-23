@@ -1,0 +1,18 @@
+### System Info API Tests
+### Tests for SystemInfoController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### Get system health status
+### Returns health status of the OpenCode server
+GET http://localhost:8080/api/system/health
+Content-Type: application/json
+
+###
+
+### Get available skills
+### Returns list of available AI skills/capabilities
+GET http://localhost:8080/api/system/skills
+Content-Type: application/json
+
+###

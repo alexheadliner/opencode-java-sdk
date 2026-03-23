@@ -1,0 +1,12 @@
+### Todo API Tests
+### Tests for TodoController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### Get session todos
+### Returns the todo list for a specific session
+# @prompt sessionId Replace with actual session ID
+GET http://localhost:8080/api/todos/{{sessionId}}
+Content-Type: application/json
+
+###

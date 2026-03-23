@@ -1,0 +1,32 @@
+### Project API Tests
+### Tests for ProjectController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### List all projects
+### Returns list of all available projects
+GET http://localhost:8080/api/projects
+Content-Type: application/json
+
+###
+
+### Get current project
+### Returns the currently active project details
+GET http://localhost:8080/api/projects/current
+Content-Type: application/json
+
+###
+
+### Update current project
+### Patch update for current project settings
+PATCH http://localhost:8080/api/projects/current
+Content-Type: application/json
+
+{
+  "commands": {
+    "build": "mvn clean install",
+    "test": "mvn test"
+  }
+}
+
+###

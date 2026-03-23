@@ -1,0 +1,57 @@
+### DevTools API Tests
+### Tests for DevToolsController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### Get LSP status
+### Returns the current Language Server Protocol status
+GET http://localhost:8080/api/devtools/lsp
+Content-Type: application/json
+
+###
+
+### Get formatter status
+### Returns the current code formatter status
+GET http://localhost:8080/api/devtools/formatter
+Content-Type: application/json
+
+###
+
+### Send log message
+### Sends a log message to the OpenCode server
+POST http://localhost:8080/api/devtools/log
+Content-Type: application/json
+
+{
+  "service": "test-service",
+  "level": "info",
+  "message": "Test log message from HTTP client"
+}
+
+###
+
+### Send log message with error level
+### Sends an error-level log message
+POST http://localhost:8080/api/devtools/log
+Content-Type: application/json
+
+{
+  "service": "test-service",
+  "level": "error",
+  "message": "Error log message from HTTP client"
+}
+
+###
+
+### Send log message with debug level
+### Sends a debug-level log message
+POST http://localhost:8080/api/devtools/log
+Content-Type: application/json
+
+{
+  "service": "test-service",
+  "level": "debug",
+  "message": "Debug log message from HTTP client"
+}
+
+###

@@ -56,6 +56,12 @@ public class OpenCodeAutoConfiguration {
         return new OpenCodeClient(config);
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public opencode.sdk.springboot.OpenCodeService openCodeService(DefaultApi defaultApi, ApiClient apiClient) {
+        return new opencode.sdk.springboot.OpenCodeService(defaultApi, apiClient);
+    }
+
     private String createBasicAuthHeader(String username, String password) {
         String credentials = username + ":" + password;
         String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());

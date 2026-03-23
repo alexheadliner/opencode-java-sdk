@@ -1,0 +1,33 @@
+package opencode.examples.springboot.controller;
+
+import lombok.RequiredArgsConstructor;
+import opencode.sdk.model.Project;
+import opencode.sdk.model.ProjectUpdateRequest;
+import opencode.sdk.springboot.OpenCodeService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/projects")
+@RequiredArgsConstructor
+public class ProjectController {
+
+    private final OpenCodeService openCodeService;
+
+    @GetMapping
+    public List<Project> listProjects() throws Exception {
+        return openCodeService.api().projectList(null, null);
+    }
+
+    @GetMapping("/current")
+    public Project getCurrentProject() throws Exception {
+        return openCodeService.api().projectCurrent(null, null);
+    }
+
+    @PatchMapping("/current")
+    public Project updateCurrentProject(@RequestBody ProjectUpdateRequest request) throws Exception {
+        Project currentProject = openCodeService.api().projectCurrent(null, null);
+        return openCodeService.api().projectUpdate(currentProject.getId(), null, null, request);
+    }
+}

@@ -13,16 +13,53 @@ This module aggregates example applications showing different ways to use the Op
 ```
 examples/
 ├── pom.xml                           # Examples parent POM
+├── AGENTS.md                         # This documentation
 ├── plain-java/                       # Plain Java example
 │   ├── pom.xml
+│   ├── README.md                     # Comprehensive run instructions
+│   ├── TESTING-PLAN.md               # Testing documentation
 │   └── src/main/java/opencode/examples/plainjava/
-│       └── Main.java
+│       ├── Main.java                 # Entry point
+│       ├── ConfigurationExample.java
+│       ├── DevToolsExample.java
+│       ├── EventStreamingExample.java
+│       ├── ExperimentalExample.java
+│       ├── FileOperationsExample.java
+│       ├── InstanceExample.java
+│       ├── InteractiveExample.java
+│       ├── McpExample.java
+│       ├── MessageExample.java
+│       ├── ProjectExample.java
+│       ├── ProviderExample.java
+│       ├── PtyExample.java
+│       ├── SessionAdvancedExample.java
+│       ├── SessionCrudExample.java
+│       ├── SystemInfoExample.java
+│       ├── TodoExample.java
+│       └── VcsExample.java
 └── spring-boot/                      # Spring Boot example
     ├── pom.xml
+    ├── AGENTS.md                     # Controller documentation
     └── src/main/java/opencode/examples/springboot/
         ├── OpenCodeSpringBootApplication.java
         └── controller/
-            └── OpenCodeController.java
+            ├── ConfigurationController.java
+            ├── DevToolsController.java
+            ├── EventStreamingController.java
+            ├── ExperimentalController.java
+            ├── FileOperationsController.java
+            ├── InstanceController.java
+            ├── InteractiveController.java
+            ├── MessageController.java
+            ├── McpController.java
+            ├── ProjectController.java
+            ├── ProviderController.java
+            ├── PtyController.java
+            ├── SessionAdvancedController.java
+            ├── SessionCrudController.java
+            ├── SystemInfoController.java
+            ├── TodoController.java
+            └── VcsController.java
 ```
 
 ## Build Configuration
@@ -66,7 +103,30 @@ See `plain-java/AGENTS.md` for specific guidelines.
 
 ## Spring Boot Example
 
-See `spring-boot/AGENTS.md` for specific guidelines.
+The Spring Boot example demonstrates comprehensive REST API coverage with 17 controllers wrapping the OpenCode SDK.
+
+### Controllers Implemented
+
+| Category | Controllers |
+|----------|-------------|
+| **System & Configuration** | SystemInfoController, ConfigurationController, ProviderController, ProjectController |
+| **File Operations** | FileOperationsController |
+| **Session Management** | SessionCrudController, SessionAdvancedController, MessageController |
+| **Development Tools** | DevToolsController, ExperimentalController |
+| **Instance & Interactive** | InstanceController, InteractiveController |
+| **MCP & Extensions** | McpController, TodoController, VcsController |
+| **Real-time & Streaming** | EventStreamingController, PtyController |
+
+### Running the Example
+
+```bash
+cd examples/spring-boot
+mvn spring-boot:run
+```
+
+Application runs on port 8081. Access endpoints at `http://localhost:8081/api/...`
+
+See [`spring-boot/AGENTS.md`](spring-boot/AGENTS.md) for complete controller documentation and HTTP test files.
 
 ## Testing Examples
 

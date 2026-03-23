@@ -1,0 +1,82 @@
+### PTY (Pseudo-Terminal) API Tests
+### Tests for PtyController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### Get all PTY sessions
+### Returns a list of all active PTY sessions
+GET http://localhost:8080/api/pty
+Content-Type: application/json
+
+###
+
+### Create new PTY session
+### Creates a new pseudo-terminal session
+POST http://localhost:8080/api/pty/
+Content-Type: application/json
+
+{
+  "command": "/bin/bash",
+  "rows": 24,
+  "cols": 80,
+  "cwd": "/project"
+}
+
+###
+
+### Create PTY with different shell
+### Creates a PTY session with a specific shell
+POST http://localhost:8080/api/pty/
+Content-Type: application/json
+
+{
+  "command": "/bin/zsh",
+  "rows": 30,
+  "cols": 120,
+  "cwd": "/home/user/project"
+}
+
+###
+
+### Get specific PTY session
+### Returns details of a specific PTY session
+# @prompt id Replace with actual PTY session ID
+GET http://localhost:8080/api/pty/{{id}}
+Content-Type: application/json
+
+###
+
+### Update PTY session
+### Updates the size of a PTY session
+# @prompt id Replace with actual PTY session ID
+PATCH http://localhost:8080/api/pty/{{id}}
+Content-Type: application/json
+
+{
+  "size": {
+    "rows": 40,
+    "cols": 100
+  }
+}
+
+###
+
+### Write to PTY session
+### Sends input to a PTY session
+# @prompt id Replace with actual PTY session ID
+PATCH http://localhost:8080/api/pty/{{id}}
+Content-Type: application/json
+
+{
+  "input": "ls -la\n"
+}
+
+###
+
+### Delete PTY session
+### Terminates and removes a PTY session
+# @prompt id Replace with actual PTY session ID
+DELETE http://localhost:8080/api/pty/{{id}}
+Content-Type: application/json
+
+###

@@ -1,0 +1,61 @@
+### Message API Tests
+### Tests for MessageController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### Get session messages
+### Returns all messages in a session
+# @prompt sessionId Replace with actual session ID
+GET http://localhost:8080/api/messages/{{sessionId}}
+Content-Type: application/json
+
+###
+
+### Send prompt to session
+### Sends a user prompt/message to the AI session
+# @prompt sessionId Replace with actual session ID
+POST http://localhost:8080/api/messages/{{sessionId}}/prompt
+Content-Type: application/json
+
+{
+  "parts": [
+    {
+      "type": "text",
+      "text": "Hello, can you help me with my Java code?"
+    }
+  ],
+  "agent": "opencode",
+  "model": "glm-4.7"
+}
+
+###
+
+### Send prompt with file reference
+### Sends a prompt that includes file context
+# @prompt sessionId Replace with actual session ID
+POST http://localhost:8080/api/messages/{{sessionId}}/prompt
+Content-Type: application/json
+
+{
+  "parts": [
+    {
+      "type": "text",
+      "text": "Please review this file:"
+    },
+    {
+      "type": "file",
+      "path": "src/main/java/opencode/Main.java"
+    }
+  ],
+  "agent": "opencode"
+}
+
+###
+
+### Abort session message
+### Aborts the current ongoing message generation
+# @prompt sessionId Replace with actual session ID
+POST http://localhost:8080/api/messages/{{sessionId}}/abort
+Content-Type: application/json
+
+###

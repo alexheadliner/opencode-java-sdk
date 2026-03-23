@@ -40,6 +40,13 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Spring Boot Starter Validation -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- Lombok - inherited from Spring Boot parent -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -60,9 +67,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
             </plugin>
         </plugins>
     </build>

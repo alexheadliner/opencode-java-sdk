@@ -16,7 +16,7 @@ This example shows how to use the OpenCode Spring Boot Starter in a Spring Boot 
 flowchart TB
     subgraph "Spring Boot Application"
         APP["OpenCodeSpringBootApplication<br/>@SpringBootApplication"]
-        CTRL["OpenCodeController<br/>@RestController"]
+        CTRL["17 REST Controllers<br/>@RestController"]
         SERVICE["OpenCodeService<br/>Auto-configured"]
     end
 
@@ -35,6 +35,62 @@ flowchart TB
     style SERVICE fill:#fff3e0
     style CLIENT fill:#fce4ec
 ```
+
+## REST Controllers
+
+The example implements 17 REST controllers that wrap the OpenCode SDK API endpoints:
+
+### System & Configuration
+
+| Controller | Base Path | Endpoints |
+|------------|-----------|-----------|
+| [`SystemInfoController`](src/main/java/opencode/examples/springboot/controller/SystemInfoController.java) | `/api/system` | GET /health, GET /skills |
+| [`ConfigurationController`](src/main/java/opencode/examples/springboot/controller/ConfigurationController.java) | `/api/config` | GET/PATCH /project, GET /global, GET /providers |
+| [`ProviderController`](src/main/java/opencode/examples/springboot/controller/ProviderController.java) | `/api/providers` | GET /, GET /{provider}, POST /{provider}/oauth/authorize, POST /{provider}/oauth/callback |
+| [`ProjectController`](src/main/java/opencode/examples/springboot/controller/ProjectController.java) | `/api/projects` | GET /, GET/PATCH /current |
+
+### File Operations
+
+| Controller | Base Path | Endpoints |
+|------------|-----------|-----------|
+| [`FileOperationsController`](src/main/java/opencode/examples/springboot/controller/FileOperationsController.java) | `/api/files` | GET /tree, GET /content, GET /search, GET /find, GET /symbols, GET /diff, GET /status |
+
+### Session Management
+
+| Controller | Base Path | Endpoints |
+|------------|-----------|-----------|
+| [`SessionCrudController`](src/main/java/opencode/examples/springboot/controller/SessionCrudController.java) | `/api/sessions` | GET /, POST /, GET/DELETE /{sessionId}, POST /{sessionId}/init |
+| [`SessionAdvancedController`](src/main/java/opencode/examples/springboot/controller/SessionAdvancedController.java) | `/api/sessions/advanced` | POST /{sessionId}/fork, POST /{sessionId}/revert, GET /{sessionId}/share, POST /{sessionId}/summarize, GET /{sessionId}/children, POST /{sessionId}/command, POST /{sessionId}/shell |
+| [`MessageController`](src/main/java/opencode/examples/springboot/controller/MessageController.java) | `/api/messages` | GET /{sessionId}, POST /{sessionId}/prompt, POST /{sessionId}/abort |
+
+### Development Tools
+
+| Controller | Base Path | Endpoints |
+|------------|-----------|-----------|
+| [`DevToolsController`](src/main/java/opencode/examples/springboot/controller/DevToolsController.java) | `/api/devtools` | GET /lsp, GET /formatter, POST /log |
+| [`ExperimentalController`](src/main/java/opencode/examples/springboot/controller/ExperimentalController.java) | `/api/experimental` | POST /workspace, GET/POST/DELETE /worktree |
+
+### Instance & Interactive
+
+| Controller | Base Path | Endpoints |
+|------------|-----------|-----------|
+| [`InstanceController`](src/main/java/opencode/examples/springboot/controller/InstanceController.java) | `/api/instances` | GET /, POST /, DELETE /{instanceId} |
+| [`InteractiveController`](src/main/java/opencode/examples/springboot/controller/InteractiveController.java) | `/api/interactive` | GET /questions, POST /questions/reply, GET /permissions, POST /permissions/reply, POST /permissions/respond |
+
+### MCP & Extensions
+
+| Controller | Base Path | Endpoints |
+|------------|-----------|-----------|
+| [`McpController`](src/main/java/opencode/examples/springboot/controller/McpController.java) | `/api/mcp` | GET /, GET /{name}/status, POST /{name}/auth/start, POST /{name}/auth/callback, DELETE /{name}/auth |
+| [`TodoController`](src/main/java/opencode/examples/springboot/controller/TodoController.java) | `/api/todos` | GET /{sessionId} |
+| [`VcsController`](src/main/java/opencode/examples/springboot/controller/VcsController.java) | `/api/vcs` | GET / |
+
+### Real-time & Streaming
+
+| Controller | Base Path | Endpoints |
+|------------|-----------|-----------|
+| [`EventStreamingController`](src/main/java/opencode/examples/springboot/controller/EventStreamingController.java) | `/api/events` | GET / (SSE), GET /global (SSE) |
+| [`PtyController`](src/main/java/opencode/examples/springboot/controller/PtyController.java) | `/api/pty` | GET /, POST /, GET/PATCH/DELETE /{id} |
 
 ## Code Style Guidelines
 
@@ -55,16 +111,16 @@ public class OpenCodeController {
 1. **Constructor Injection**
    ```java
    @RequiredArgsConstructor
-   public class OpenCodeController {
+   public class SystemInfoController {
        private final OpenCodeService openCodeService;
    }
    ```
 
 2. **Endpoint Design**
    ```java
-   @GetMapping("/data/{endpoint}")
-   public ApiResponse getData(@PathVariable String endpoint) {
-       return openCodeService.getData(endpoint);
+   @GetMapping("/health")
+   public ResponseEntity<GlobalHealth200Response> getHealth() {
+       return ResponseEntity.ok(openCodeService.getHealth());
    }
    ```
 
@@ -129,18 +185,31 @@ java -jar target/opencode-examples-spring-boot-0.1.0-SNAPSHOT.jar
 
 Once running:
 - Application: http://localhost:8081
-- API Endpoint: http://localhost:8081/api/data/{endpoint}
-- Health Check: http://localhost:8081/actuator/health
+- Health Check: http://localhost:8081/api/system/health
+- Skills: http://localhost:8081/api/system/skills
+- Sessions: http://localhost:8081/api/sessions
 
-## Example Requests
+## HTTP Test Files
 
-```bash
-# Get data from OpenCode server
-curl http://localhost:8081/api/data/health
+HTTP test files are available in the `http/` directory at the project root for testing all endpoints:
 
-# With parameters
-curl http://localhost:8081/api/data/v1/resources
-```
+- `http/system-info.http` - System and health endpoints
+- `http/configuration.http` - Configuration endpoints
+- `http/provider.http` - Provider management
+- `http/project.http` - Project operations
+- `http/file-operations.http` - File system operations
+- `http/session-crud.http` - Session CRUD operations
+- `http/session-advanced.http` - Advanced session operations
+- `http/message.http` - Message operations
+- `http/devtools.http` - Development tools
+- `http/experimental.http` - Experimental features
+- `http/instance.http` - Instance management
+- `http/interactive.http` - Interactive questions/permissions
+- `http/mcp.http` - MCP server management
+- `http/todo.http` - Todo operations
+- `http/vcs.http` - Version control operations
+- `http/event-streaming.http` - SSE event streaming
+- `http/pty.http` - PTY operations
 
 ## Project Structure
 
@@ -148,7 +217,23 @@ curl http://localhost:8081/api/data/v1/resources
 src/main/java/opencode/examples/springboot/
 ├── OpenCodeSpringBootApplication.java     # Main application class
 └── controller/
-    └── OpenCodeController.java            # REST controller
+    ├── SystemInfoController.java          # /api/system
+    ├── ConfigurationController.java       # /api/config
+    ├── ProviderController.java            # /api/providers
+    ├── ProjectController.java             # /api/projects
+    ├── FileOperationsController.java      # /api/files
+    ├── SessionCrudController.java         # /api/sessions
+    ├── SessionAdvancedController.java     # /api/sessions/advanced
+    ├── MessageController.java             # /api/messages
+    ├── DevToolsController.java            # /api/devtools
+    ├── ExperimentalController.java        # /api/experimental
+    ├── InstanceController.java            # /api/instances
+    ├── InteractiveController.java         # /api/interactive
+    ├── McpController.java                 # /api/mcp
+    ├── TodoController.java                # /api/todos
+    ├── VcsController.java                 # /api/vcs
+    ├── EventStreamingController.java      # /api/events
+    └── PtyController.java                 # /api/pty
 
 src/main/resources/
 ├── application.yml                         # Configuration
@@ -162,27 +247,16 @@ src/main/resources/
 - Uses `@SpringBootApplication`
 - Runs on port 8081 (to avoid conflict with OpenCode server on 4096)
 
-### OpenCodeController
-- REST controller with `/api` base path
-- Injects `OpenCodeService` via constructor
-- Exposes endpoints that delegate to SDK
+### Controllers
+- REST controllers with `/api` base path
+- Inject `OpenCodeService` via constructor
+- Expose endpoints that delegate to SDK
 
 ## Testing
 
 - Do NOT create tests for this example
 - Manual verification via curl/browser is sufficient
 - Example is for demonstration only
-
-## Extending the Example
-
-To add new endpoints:
-
-```java
-@GetMapping("/custom/{path}")
-public ApiResponse getCustomData(@PathVariable String path) {
-    return openCodeService.getData("/custom/" + path);
-}
-```
 
 ## Troubleshooting
 

@@ -1,0 +1,48 @@
+### MCP (Model Context Protocol) API Tests
+### Tests for McpController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### Get all MCP servers
+### Returns a list of all configured MCP servers
+GET http://localhost:8080/api/mcp
+Content-Type: application/json
+
+###
+
+### Get MCP server status
+### Returns the status of a specific MCP server
+# @prompt name Replace with actual MCP server name
+GET http://localhost:8080/api/mcp/{{name}}/status
+Content-Type: application/json
+
+###
+
+### Start MCP authentication
+### Initiates the OAuth authentication flow for an MCP server
+# @prompt name Replace with actual MCP server name
+POST http://localhost:8080/api/mcp/{{name}}/auth/start
+Content-Type: application/json
+
+###
+
+### Handle MCP OAuth callback
+### Handles the OAuth callback from an MCP server
+# @prompt name Replace with actual MCP server name
+POST http://localhost:8080/api/mcp/{{name}}/auth/callback
+Content-Type: application/json
+
+{
+  "code": "oauth_authorization_code",
+  "state": "oauth_state_parameter"
+}
+
+###
+
+### Remove MCP authentication
+### Removes stored authentication for an MCP server
+# @prompt name Replace with actual MCP server name
+DELETE http://localhost:8080/api/mcp/{{name}}/auth
+Content-Type: application/json
+
+###

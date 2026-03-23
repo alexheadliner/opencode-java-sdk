@@ -4,38 +4,95 @@ Demonstrates direct usage of the OpenCode SDK without Spring Boot.
 
 ## Purpose
 
-This example shows how to use the OpenCode SDK in a plain Java application, without any Spring Boot dependencies. It demonstrates programmatic configuration and direct SDK client usage.
+This example shows how to use the OpenCode SDK in a plain Java application with 18 comprehensive examples covering all SDK features.
 
-## Code Style Guidelines
+## Project Structure
 
-### NO Lombok
-This example follows the SDK pattern and does NOT use Lombok. Use explicit getters and setters when creating configuration classes.
-
-### Main Class Structure
-```java
-public class Main {
-    public static void main(String[] args) {
-        // 1. Create configuration
-        OpenCodeConfig config = new OpenCodeConfig();
-        config.setBaseUrl("https://api.opencode.dev");
-        config.setApiKey("your-api-key");
-        
-        // 2. Create client
-        OpenCodeClient client = new OpenCodeClient(config);
-        
-        // 3. Use client
-        ApiResponse response = client.get("/v1/resources");
-        System.out.println("Status: " + response.getStatus());
-    }
-}
+```
+src/main/java/opencode/examples/plainjava/
+├── Main.java                      # Entry point - runs all examples
+├── ConfigurationExample.java      # Configuration management
+├── DevToolsExample.java           # LSP and formatter status
+├── EventStreamingExample.java     # SSE event streaming
+├── ExperimentalExample.java       # Workspace and worktree operations
+├── FileOperationsExample.java     # File tree, content, search
+├── InstanceExample.java           # Instance management
+├── InteractiveExample.java        # Questions and permissions
+├── McpExample.java                # MCP server management
+├── MessageExample.java            # Session messaging
+├── ProjectExample.java            # Project operations
+├── ProviderExample.java           # Provider configuration
+├── PtyExample.java                # PTY terminal operations
+├── SessionAdvancedExample.java    # Fork, revert, summarize
+├── SessionCrudExample.java        # Session CRUD operations
+├── SystemInfoExample.java         # Health and skills
+├── TodoExample.java               # Todo management
+└── VcsExample.java                # Version control info
 ```
 
-### Key Principles
-1. Keep main method simple and linear
-2. Add comments explaining configuration values
-3. Use meaningful variable names
-4. Handle exceptions gracefully
-5. Print results to console for demonstration
+## Example Classes by Category
+
+### System & Configuration
+| Example | Description |
+|---------|-------------|
+| **SystemInfoExample** | Health checks and app skills |
+| **ConfigurationExample** | Global and project configuration |
+| **ProviderExample** | Provider listing and OAuth |
+| **ProjectExample** | Project info and updates |
+
+### Session Management
+| Example | Description |
+|---------|-------------|
+| **SessionCrudExample** | Create, read, update, delete sessions |
+| **SessionAdvancedExample** | Fork, revert, share, summarize sessions |
+| **MessageExample** | Send prompts and receive responses |
+
+### File Operations
+| Example | Description |
+|---------|-------------|
+| **FileOperationsExample** | File tree, content, search, symbols |
+
+### Development Tools
+| Example | Description |
+|---------|-------------|
+| **DevToolsExample** | LSP and formatter status |
+| **ExperimentalExample** | Workspace and worktree management |
+
+### Instance & Interactive
+| Example | Description |
+|---------|-------------|
+| **InstanceExample** | Server instance management |
+| **InteractiveExample** | Questions and permissions handling |
+
+### MCP & Extensions
+| Example | Description |
+|---------|-------------|
+| **McpExample** | MCP server configuration and auth |
+| **TodoExample** | Session todo management |
+| **VcsExample** | Version control information |
+
+### Real-time
+| Example | Description |
+|---------|-------------|
+| **EventStreamingExample** | Server-sent events |
+| **PtyExample** | Pseudo-terminal operations |
+
+## Running the Examples
+
+### Build
+```bash
+cd examples/plain-java
+mvn clean package
+```
+
+### Run
+```bash
+# Run Main.java which executes all examples
+java -jar target/opencode-examples-plain-java-0.1.0-SNAPSHOT.jar
+
+# Or with Maven
+mvn exec:java -Dexec.mainClass="opencode.examples.plainjava.Main"
+```
 
 ## Dependencies
 
@@ -45,55 +102,19 @@ public class Main {
 | JUnit Jupiter | test | Unit testing |
 | AssertJ | test | Fluent assertions |
 
-## Build and Run
+## Code Style
 
-### Build
-```bash
-# From project root
-cd examples/plain-java
-mvn clean package
-
-# Or from this directory
-mvn clean package
-```
-
-### Run
-```bash
-# Run the packaged JAR
-java -jar target/opencode-examples-plain-java-0.1.0-SNAPSHOT.jar
-
-# Or run main class directly
-mvn exec:java -Dexec.mainClass="opencode.examples.plainjava.Main"
-```
+- NO Lombok - explicit getters/setters only
+- Plain Java 21 features
+- SLF4J for logging
+- Each example is self-contained
 
 ## Configuration
 
-The example uses programmatic configuration:
-
-```java
-OpenCodeConfig config = new OpenCodeConfig();
-config.setBaseUrl("https://api.opencode.dev");  // OpenCode server URL
-config.setApiKey("your-api-key");               // API authentication
-config.setTimeout(30);                          // Request timeout in seconds
-```
-
-## Expected Output
-
-```
-Status: 200
-Data: {...}
-Message: Success
-```
-
-## Extending the Example
-
-To add new API calls:
-1. Create new methods in the Main class
-2. Use the existing OpenCodeClient instance
-3. Print results to console
+See [README.md](README.md) for detailed configuration instructions.
 
 ## Testing
 
-- Do NOT create tests for this example
+- Do NOT create tests for examples
 - Manual verification is sufficient
-- Example is for demonstration only
+- Examples are for demonstration only

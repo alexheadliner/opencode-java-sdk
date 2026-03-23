@@ -48,10 +48,14 @@ flowchart TB
 | File | Purpose |
 |------|---------|
 | `Dockerfile` | Container definition |
-| `config/opencode.json` | OpenCode server configuration with Z.AI provider |
-| `config/auth.json` | Authentication configuration template |
-| `start.sh` | Startup script with environment variable handling |
+| `config/opencode.json.template` | Template for OpenCode server configuration |
+| `config/auth.json.template` | Template for authentication configuration |
+| `config/opencode.json` | Generated OpenCode config (from template at runtime) |
+| `config/auth.json` | Generated auth config (from template at runtime) |
+| `start.sh` | Startup script with environment variable handling and template processing |
 | `.env.opencode` | Environment variables for Docker Compose |
+| `.env.opencode.example` | Example environment file with all required variables |
+|
 
 ## Default Configuration
 

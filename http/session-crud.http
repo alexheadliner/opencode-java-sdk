@@ -1,0 +1,53 @@
+### Session CRUD API Tests
+### Tests for SessionCrudController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### List all sessions
+### Returns list of all AI sessions
+GET http://localhost:8080/api/sessions
+Content-Type: application/json
+
+###
+
+### Create new session
+### Creates a new AI session
+POST http://localhost:8080/api/sessions/
+Content-Type: application/json
+
+{
+  "agent": "opencode",
+  "model": "glm-4.7"
+}
+
+###
+
+### Get session by ID
+### Returns details of a specific session
+# @prompt sessionId Replace with actual session ID
+GET http://localhost:8080/api/sessions/{{sessionId}}
+Content-Type: application/json
+
+###
+
+### Delete session
+### Deletes a specific session
+# @prompt sessionId Replace with actual session ID
+DELETE http://localhost:8080/api/sessions/{{sessionId}}
+Content-Type: application/json
+
+###
+
+### Initialize session
+### Initializes a session with specific configuration
+# @prompt sessionId Replace with actual session ID
+POST http://localhost:8080/api/sessions/{{sessionId}}/init
+Content-Type: application/json
+
+{
+  "agent": "opencode",
+  "model": "glm-4.7",
+  "prompt": "Hello, how can you help me?"
+}
+
+###

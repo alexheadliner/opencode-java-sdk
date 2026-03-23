@@ -1,0 +1,11 @@
+### VCS (Version Control System) API Tests
+### Tests for VcsController endpoints
+### Base URL: http://localhost:8080
+### OpenCode server: http://localhost:4096
+
+### Get VCS information
+### Returns version control system information for the current project
+GET http://localhost:8080/api/vcs
+Content-Type: application/json
+
+###

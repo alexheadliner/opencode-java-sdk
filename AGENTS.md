@@ -152,8 +152,24 @@ The SDK is now auto-generated from OpenAPI specification and includes:
 - `OpenCodeService` - Spring-managed service wrapper
 
 ### Examples (`examples/`)
-- Plain Java: Demonstrates direct SDK usage
-- Spring Boot: Demonstrates starter integration with REST controllers
+- Plain Java: Demonstrates direct SDK usage with 18 example classes
+- Spring Boot: Comprehensive REST API with 17 controllers covering all SDK endpoints
+
+#### Spring Boot Controllers
+
+The Spring Boot example implements complete API coverage with 17 REST controllers:
+
+| Category | Controllers |
+|----------|-------------|
+| System & Config | SystemInfoController, ConfigurationController, ProviderController, ProjectController |
+| File Operations | FileOperationsController |
+| Session Management | SessionCrudController, SessionAdvancedController, MessageController |
+| Dev Tools | DevToolsController, ExperimentalController |
+| Instance & Interactive | InstanceController, InteractiveController |
+| MCP & Extensions | McpController, TodoController, VcsController |
+| Real-time | EventStreamingController (SSE), PtyController |
+
+See [`examples/spring-boot/AGENTS.md`](examples/spring-boot/AGENTS.md) for complete documentation.
 
 ## Docker Infrastructure
 

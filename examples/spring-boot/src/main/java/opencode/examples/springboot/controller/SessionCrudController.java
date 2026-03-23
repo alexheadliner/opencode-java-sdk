@@ -1,0 +1,75 @@
+package opencode.examples.springboot.controller;
+
+import lombok.RequiredArgsConstructor;
+import opencode.sdk.invoker.ApiException;
+import opencode.sdk.model.Session;
+import opencode.sdk.model.SessionCreateRequest;
+import opencode.sdk.model.SessionInitRequest;
+import opencode.sdk.model.SessionUpdateRequest;
+import opencode.sdk.springboot.OpenCodeService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/sessions")
+@RequiredArgsConstructor
+public class SessionCrudController {
+
+    private final OpenCodeService openCodeService;
+
+    private boolean isValidSessionId(String sessionId) {
+        return sessionId != null && sessionId.startsWith("ses_");
+    }
+
+    @GetMapping
+    public List<Session> listSessions() throws ApiException {
+        return openCodeService.api().sessionList(null, null, null, null, null, null);
+    }
+
+    @PostMapping
+    public Session createSession(@RequestBody SessionCreateRequest request) throws ApiException {
+        return openCodeService.api().sessionCreate(null, null, request);
+    }
+
+    @GetMapping("/{sessionId}")
+    public ResponseEntity<?> getSession(@PathVariable String sessionId) throws ApiException {
+        if (!isValidSessionId(sessionId)) {
+            return ResponseEntity.notFound().build();
+        }
+        Session session = openCodeService.sessionApi().sessionGet(sessionId, null, null);
+        return ResponseEntity.ok(session);
+    }
+
+    @PatchMapping("/{sessionId}")
+    public ResponseEntity<?> updateSession(
+            @PathVariable String sessionId,
+            @RequestBody SessionUpdateRequest request) throws ApiException {
+        if (!isValidSessionId(sessionId)) {
+            return ResponseEntity.notFound().build();
+        }
+        openCodeService.api().sessionUpdate(sessionId, null, null, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{sessionId}")
+    public ResponseEntity<?> deleteSession(@PathVariable String sessionId) throws ApiException {
+        if (!isValidSessionId(sessionId)) {
+            return ResponseEntity.notFound().build();
+        }
+        openCodeService.api().sessionDelete(sessionId, null, null);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{sessionId}/init")
+    public ResponseEntity<?> initSession(
+            @PathVariable String sessionId,
+            @RequestBody SessionInitRequest request) throws ApiException {
+        if (!isValidSessionId(sessionId)) {
+            return ResponseEntity.notFound().build();
+        }
+        openCodeService.api().sessionInit(sessionId, null, null, request);
+        return ResponseEntity.noContent().build();
+    }
+}
