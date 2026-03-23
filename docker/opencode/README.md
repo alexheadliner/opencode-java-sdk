@@ -146,6 +146,3 @@ The service runs on the `opencode-sdk` bridge network and exposes:
    - The `.env.opencode` file exists and is properly configured
    - Or the environment variables are set before running docker-compose
    - The variables are exported (use `export VAR=value` in shell)
-
-5. **Startup:**
-
