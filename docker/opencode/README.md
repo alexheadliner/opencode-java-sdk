@@ -148,18 +148,4 @@ The service runs on the `opencode-sdk` bridge network and exposes:
    - The variables are exported (use `export VAR=value` in shell)
 
 5. **Startup:**
-# Method 1: Using environment file
-cp .env.opencode.example .env.opencode
-# Edit .env.opencode with real values
-docker-compose up
-
-# Method 2: Command line
-Z_AI_API_KEY="your-key" OPENCODE_SERVER_USERNAME="user" OPENCODE_SERVER_PASSWORD="pass" docker-compose up
-
-# Method 3: Docker run
-docker run -e Z_AI_API_KEY="your-key" \
--e OPENCODE_SERVER_USERNAME="user" \
--e OPENCODE_SERVER_PASSWORD="pass" \
--p 4096:4096 \
-opencode-server
 
