@@ -254,9 +254,288 @@ src/main/resources/
 
 ## Testing
 
-- Do NOT create tests for this example
-- Manual verification via curl/browser is sufficient
-- Example is for demonstration only
+### Overview
+
+This module includes comprehensive integration tests using TestContainers to test all REST controllers against a real OpenCode server instance running in Docker. The tests verify endpoint functionality, request/response serialization, and error handling.
+
+### Test Infrastructure
+
+#### OpenCodeServerContainer
+
+Custom TestContainers wrapper that manages the OpenCode server Docker container:
+
+```java
+@Container
+protected static final OpenCodeServerContainer OPENCODE_CONTAINER = new OpenCodeServerContainer()
+    .withReuse(true);
+```
+
+**Features:**
+- Extends `GenericContainer` from TestContainers
+- Exposes port 4096 (OpenCode server default)
+- Configures authentication (username: `opencode`, password: `opencode123`)
+- Waits for `/global/health` endpoint with 2-minute timeout
+- Supports container reuse for faster test execution
+
+**Location:** [`src/test/java/opencode/examples/springboot/testsupport/OpenCodeServerContainer.java`](src/test/java/opencode/examples/springboot/testsupport/OpenCodeServerContainer.java)
+
+#### AbstractIntegrationTest
+
+Base class for all integration tests providing common setup:
+
+```java
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Testcontainers
+@ActiveProfiles("test")
+public abstract class AbstractIntegrationTest {
+    
+    @Container
+    protected static final OpenCodeServerContainer OPENCODE_CONTAINER = ...;
+    
+    @Autowired
+    protected TestRestTemplate restTemplate;
+    
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("opencode.base-url", OPENCODE_CONTAINER::getBaseUrl);
+        registry.add("opencode.username", () -> "opencode");
+        registry.add("opencode.password", () -> "opencode123");
+    }
+}
+```
+
+**Features:**
+- Runs Spring Boot with random port to avoid conflicts
+- Activates `test` profile for test-specific configuration
+- Injects `TestRestTemplate` for HTTP requests
+- Dynamically configures OpenCode SDK properties from container
+
+**Location:** [`src/test/java/opencode/examples/springboot/testsupport/AbstractIntegrationTest.java`](src/test/java/opencode/examples/springboot/testsupport/AbstractIntegrationTest.java)
+
+### Test Classes
+
+All integration tests follow the naming convention `*IT.java` and extend `AbstractIntegrationTest`:
+
+| Test Class | Controller Tested | Endpoints Covered |
+|------------|-------------------|-------------------|
+| [`ConfigurationControllerIT`](src/test/java/opencode/examples/springboot/controller/ConfigurationControllerIT.java) | ConfigurationController | GET /api/config/global, GET /api/config/providers, GET /api/config/project, PATCH /api/config/project |
+| [`DevToolsControllerIT`](src/test/java/opencode/examples/springboot/controller/DevToolsControllerIT.java) | DevToolsController | GET /api/devtools/lsp, GET /api/devtools/formatter, POST /api/devtools/log |
+| [`FileOperationsControllerIT`](src/test/java/opencode/examples/springboot/controller/FileOperationsControllerIT.java) | FileOperationsController | GET /api/files/tree, GET /api/files/content, GET /api/files/search |
+| [`InstanceControllerIT`](src/test/java/opencode/examples/springboot/controller/InstanceControllerIT.java) | InstanceController | GET /api/instances, POST /api/instances, DELETE /api/instances/{id} |
+| [`MessageControllerIT`](src/test/java/opencode/examples/springboot/controller/MessageControllerIT.java) | MessageController | GET /api/messages/{sessionId}, POST /api/messages/{sessionId}/prompt, POST /api/messages/{sessionId}/abort |
+| [`ProjectControllerIT`](src/test/java/opencode/examples/springboot/controller/ProjectControllerIT.java) | ProjectController | GET /api/projects, GET /api/projects/current, PATCH /api/projects/current |
+| [`ProviderControllerIT`](src/test/java/opencode/examples/springboot/controller/ProviderControllerIT.java) | ProviderController | GET /api/providers, GET /api/providers/{provider} |
+| [`SessionAdvancedControllerIT`](src/test/java/opencode/examples/springboot/controller/SessionAdvancedControllerIT.java) | SessionAdvancedController | POST /api/sessions/advanced/{sessionId}/fork, POST /api/sessions/advanced/{sessionId}/revert, GET /api/sessions/advanced/{sessionId}/children |
+| [`SessionCrudControllerIT`](src/test/java/opencode/examples/springboot/controller/SessionCrudControllerIT.java) | SessionCrudController | GET /api/sessions, POST /api/sessions, GET /api/sessions/{sessionId}, DELETE /api/sessions/{sessionId} |
+| [`SystemInfoControllerIT`](src/test/java/opencode/examples/springboot/controller/SystemInfoControllerIT.java) | SystemInfoController | GET /api/system/health, GET /api/system/skills |
+| [`TodoControllerIT`](src/test/java/opencode/examples/springboot/controller/TodoControllerIT.java) | TodoController | GET /api/todos/{sessionId} |
+| [`VcsControllerIT`](src/test/java/opencode/examples/springboot/controller/VcsControllerIT.java) | VcsController | GET /api/vcs |
+
+### Test Naming Conventions
+
+- **Class names:** End with `IT` (e.g., `SystemInfoControllerIT`)
+- **Method names:** Use descriptive names following `should<ExpectedBehavior>When<Condition>` pattern
+- **Test structure:** Given-When-Then comments for clarity
+
+Example test method:
+```java
+@Test
+void shouldReturnHealthStatusWhenServerIsRunning() {
+    // Given - container is running
+    
+    // When
+    ResponseEntity<GlobalHealth200Response> response =
+        restTemplate.getForEntity("/api/system/health", GlobalHealth200Response.class);
+    
+    // Then
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).isNotNull();
+}
+```
+
+### Running Tests
+
+#### Prerequisites
+
+1. **Docker Desktop** must be installed and running
+2. Docker daemon must be accessible (verify with `docker ps`)
+3. Sufficient disk space for container images (~500MB)
+
+#### Commands
+
+**Run all integration tests:**
+```bash
+cd examples/spring-boot
+mvn clean verify
+```
+
+**Run tests with specific profile:**
+```bash
+mvn clean verify -P integration-tests
+```
+
+**Run specific test class:**
+```bash
+mvn test -Dtest=SystemInfoControllerIT
+```
+
+**Run with debugging:**
+```bash
+mvn test -Dtest=SystemInfoControllerIT -Dmaven.surefire.debug
+```
+
+**Skip integration tests (run only unit tests):**
+```bash
+mvn clean test -DskipITs=true
+```
+
+#### Profile Activation
+
+The tests use the `test` profile activated by `@ActiveProfiles("test")` on the base class. This loads:
+- [`application-test.properties`](src/test/resources/application-test.properties)
+- Test-specific beans and configuration
+
+### Test Configuration
+
+#### application-test.properties
+
+```properties
+# Server Configuration - use random port to avoid conflicts
+server.port=0
+
+# OpenCode Configuration
+# These values are placeholders - actual values are set by AbstractIntegrationTest
+# via DynamicPropertySource from the TestContainers instance
+opencode.base-url=http://localhost:4096
+opencode.username=opencode
+opencode.password=opencode123
+opencode.project-path=${user.dir}
+
+# Logging Configuration
+logging.level.root=INFO
+logging.level.opencode=DEBUG
+logging.level.org.testcontainers=INFO
+
+# Test-specific settings
+spring.main.banner-mode=off
+```
+
+**Location:** [`src/test/resources/application-test.properties`](src/test/resources/application-test.properties)
+
+#### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `Z_AI_API_KEY` | API key for Z.AI provider (if testing real provider) | `test-key` |
+| `TESTCONTAINERS_REUSE_ENABLE` | Enable container reuse between test runs | `false` |
+| `TESTCONTAINERS_RYUK_DISABLED` | Disable Ryuk container cleanup (faster but less safe) | `false` |
+
+#### Docker Container Configuration
+
+The TestContainers setup configures the OpenCode server with:
+- **Port:** 4096 (mapped to random host port)
+- **Username:** opencode
+- **Password:** opencode123
+- **Health Check:** Waits for `/global/health` returning HTTP 200
+- **Startup Timeout:** 2 minutes
+
+### Test Dependencies
+
+| Dependency | Scope | Purpose |
+|------------|-------|---------|
+| `spring-boot-starter-test` | test | Spring Boot test support |
+| `testcontainers` | test | Docker container management |
+| `junit-jupiter` | test | JUnit 5 testing framework |
+| `assertj-core` | test | Fluent assertions |
+
+### Troubleshooting
+
+#### Docker Connection Issues
+
+**Error:** `Cannot connect to Docker daemon`
+
+**Solution:**
+- Ensure Docker Desktop is running
+- Check Docker is accessible: `docker ps`
+- On Windows: Ensure Docker Desktop is set to use Linux containers
+- Try restarting Docker Desktop
+
+#### Container Startup Timeout
+
+**Error:** `Container startup failed with timeout`
+
+**Solution:**
+- Increase timeout in `OpenCodeServerContainer.java`:
+  ```java
+  .withStartupTimeout(Duration.ofMinutes(5))
+  ```
+- Check Docker has sufficient resources (RAM/CPU)
+- Pull the image manually first: `docker pull alpine:latest`
+
+#### Port Conflicts
+
+**Error:** `Port already in use`
+
+**Solution:**
+- Tests use random ports (`server.port=0`), but if you see conflicts:
+- Check for orphaned containers: `docker ps -a`
+- Remove stopped containers: `docker container prune`
+
+#### Test Failures Due to Container Reuse
+
+**Error:** Tests pass individually but fail when run together
+
+**Solution:**
+- Container reuse may cause state issues
+- Disable reuse: Remove `.withReuse(true)` from `AbstractIntegrationTest`
+- Or run with: `TESTCONTAINERS_REUSE_ENABLE=false mvn test`
+
+#### Slow Test Execution
+
+**Optimization tips:**
+- Enable container reuse: `TESTCONTAINERS_REUSE_ENABLE=true`
+- Disable Ryuk (development only): `TESTCONTAINERS_RYUK_DISABLED=true`
+- Run tests in parallel (if tests are independent):
+  ```bash
+  mvn test -DforkCount=2
+  ```
+
+#### Memory Issues
+
+**Error:** `OutOfMemoryError` during tests
+
+**Solution:**
+- Increase Maven heap size:
+  ```bash
+  set MAVEN_OPTS=-Xmx2g
+  mvn test
+  ```
+- Increase Docker Desktop memory allocation (Settings > Resources)
+
+### Project Structure
+
+```
+src/test/
+├── java/opencode/examples/springboot/
+│   └── controller/
+│       ├── ConfigurationControllerIT.java
+│       ├── DevToolsControllerIT.java
+│       ├── FileOperationsControllerIT.java
+│       ├── InstanceControllerIT.java
+│       ├── MessageControllerIT.java
+│       ├── ProjectControllerIT.java
+│       ├── ProviderControllerIT.java
+│       ├── SessionAdvancedControllerIT.java
+│       ├── SessionCrudControllerIT.java
+│       ├── SystemInfoControllerIT.java
+│       ├── TodoControllerIT.java
+│       └── VcsControllerIT.java
+│   └── testsupport/
+│       ├── AbstractIntegrationTest.java    # Base test class
+│       └── OpenCodeServerContainer.java    # TestContainers wrapper
+└── resources/
+    └── application-test.properties         # Test configuration
+```
 
 ## Troubleshooting
 
