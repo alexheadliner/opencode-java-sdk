@@ -15,8 +15,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public abstract class AbstractIntegrationTest {
 
     @Container
-    protected static final OpenCodeServerContainer OPENCODE_CONTAINER = new OpenCodeServerContainer()
-            .withReuse(false);
+    protected static final OpenCodeServerContainer OPENCODE_CONTAINER = 
+        new OpenCodeServerContainer()
+            .withReuse(!isCiEnvironment() && Boolean.parseBoolean(
+                System.getProperty("testcontainers.reuse.enable", "false")
+            ));
 
     @Autowired
     protected TestRestTemplate restTemplate;
@@ -26,5 +29,12 @@ public abstract class AbstractIntegrationTest {
         registry.add("opencode.base-url", OPENCODE_CONTAINER::getBaseUrl);
         registry.add("opencode.username", () -> "opencode");
         registry.add("opencode.password", () -> "opencode123");
+    }
+
+    private static boolean isCiEnvironment() {
+        return System.getenv("CI") != null ||
+               System.getenv("GITHUB_ACTIONS") != null ||
+               System.getenv("GITLAB_CI") != null ||
+               System.getenv("JENKINS_URL") != null;
     }
 }

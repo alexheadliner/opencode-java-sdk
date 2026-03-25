@@ -550,3 +550,38 @@ src/test/
 3. **Auto-configuration Not Working**
    - Verify starter dependency in pom.xml
    - Check `opencode.*` properties in application.yml
+
+## Integration Testing
+
+The project includes comprehensive integration tests that use Testcontainers to run an OpenCode server in Docker.
+
+### Quick Start
+
+1. **Build the Docker image:**
+   ```bash
+   ./build-docker-image.sh  # Linux/macOS
+   build-docker-image.bat   # Windows
+   ```
+
+2. **Run integration tests:**
+   ```bash
+   mvn clean test -DrunIntegrationTests
+   ```
+
+### Container Reuse
+
+For faster development, enable container reuse in `src/test/resources/.testcontainers.properties`:
+```properties
+testcontainers.reuse.enable=true
+```
+
+Stop reused containers with:
+```bash
+./stop-reused-container.sh
+```
+
+**Note:** Reuse is automatically disabled in CI environments.
+
+### Documentation
+
+See [src/test/README.md](src/test/README.md) for detailed integration test documentation.

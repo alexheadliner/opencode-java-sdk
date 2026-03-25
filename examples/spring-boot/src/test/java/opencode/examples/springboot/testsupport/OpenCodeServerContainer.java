@@ -5,10 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.utility.DockerImageName;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.time.Duration;
 
 public class OpenCodeServerContainer extends GenericContainer<OpenCodeServerContainer> {
@@ -18,11 +18,10 @@ public class OpenCodeServerContainer extends GenericContainer<OpenCodeServerCont
     private static final int OPENCODE_PORT = 4096;
     private static final String DEFAULT_USERNAME = "opencode";
     private static final String DEFAULT_PASSWORD = "opencode123";
-    private static final String IMAGE_NAME = "opencode-server";
-    private static final String IMAGE_TAG = "test";
+    private static final String IMAGE_NAME = "opencode-server:test";
 
     public OpenCodeServerContainer() {
-        super(buildImage());
+        super(validateImage());
 
         LOGGER.info("Initializing OpenCodeServerContainer...");
 
@@ -41,36 +40,78 @@ public class OpenCodeServerContainer extends GenericContainer<OpenCodeServerCont
         // Enable container log output for debugging
         withLogConsumer(new Slf4jLogConsumer(LOGGER));
 
-        // Extended timeout for image build + container startup
-        // Image build includes npm install which can take several minutes
+        // Reduced timeout since we're using pre-built image
+        // Health endpoint requires basic auth
         waitingFor(Wait.forHttp("/global/health")
                 .forPort(OPENCODE_PORT)
+                .withBasicCredentials(DEFAULT_USERNAME, DEFAULT_PASSWORD)
                 .forStatusCode(200)
-                .withStartupTimeout(Duration.ofMinutes(10)));
+                .withStartupTimeout(Duration.ofSeconds(30)));
 
-        LOGGER.info("OpenCodeServerContainer configured with port {} and 10-minute timeout", OPENCODE_PORT);
+        // Add reusable container labels
+        withLabel("reuse-hash", generateReuseHash());
+
+        LOGGER.info("OpenCodeServerContainer configured with port {} and 30-second timeout", OPENCODE_PORT);
     }
 
-    private static ImageFromDockerfile buildImage() {
-        // Build from project root - tests run from examples/spring-boot
-        // so we need to go up two levels to reach the project root
-        Path projectRoot = Paths.get("../..").toAbsolutePath().normalize();
-        Path dockerfilePath = projectRoot.resolve("docker/opencode/Dockerfile");
+    private static DockerImageName validateImage() {
+        DockerImageName imageName = DockerImageName.parse(IMAGE_NAME);
 
-        LOGGER.info("Project root path: {}", projectRoot);
-        LOGGER.info("Dockerfile path: {}", dockerfilePath);
-        LOGGER.info("Dockerfile exists: {}", dockerfilePath.toFile().exists());
-        LOGGER.info("Docker context path: {}", projectRoot.resolve("docker/opencode"));
-
-        if (!dockerfilePath.toFile().exists()) {
-            throw new RuntimeException("Dockerfile not found at: " + dockerfilePath);
+        // Check if Docker is running and image exists by attempting to list the image
+        if (!isDockerAvailable()) {
+            throw new RuntimeException("Docker daemon is not running. Please start Docker and try again.");
         }
 
-        // Use ImageFromDockerfile with cache enabled (second parameter = true)
-        // This allows Docker to cache layers and speed up subsequent builds
-        return new ImageFromDockerfile(IMAGE_NAME + ":" + IMAGE_TAG, true)
-                .withDockerfile(dockerfilePath)
-                .withFileFromPath(".", projectRoot.resolve("docker/opencode"));
+        if (!doesImageExist(IMAGE_NAME)) {
+            throw new RuntimeException(
+                "Docker image '" + IMAGE_NAME + "' not found. Build it using: " +
+                "mvn clean install -Pbuild-docker-image or run ./build-docker-image.sh"
+            );
+        }
+
+        return imageName;
+    }
+
+    private static boolean isDockerAvailable() {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("docker", "version", "--format", "{{.Server.Version}}");
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            boolean finished = process.waitFor(5, java.util.concurrent.TimeUnit.SECONDS);
+            return finished && process.exitValue() == 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static boolean doesImageExist(String imageName) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("docker", "images", "--format", "{{.Repository}}:{{.Tag}}", imageName);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.equals(imageName)) {
+                        return true;
+                    }
+                }
+            }
+
+            process.waitFor(5, java.util.concurrent.TimeUnit.SECONDS);
+            return false;
+        } catch (Exception e) {
+            LOGGER.warn("Failed to check if image exists: {}", e.getMessage());
+            // Assume image exists to let Testcontainers handle the error
+            return true;
+        }
+    }
+
+    private String generateReuseHash() {
+        // Generate a consistent hash based on image name and configuration
+        String config = IMAGE_NAME + ":" + OPENCODE_PORT + ":" + DEFAULT_USERNAME;
+        return String.valueOf(config.hashCode());
     }
 
     @Override
@@ -95,7 +136,7 @@ public class OpenCodeServerContainer extends GenericContainer<OpenCodeServerCont
     @Override
     public void start() {
         LOGGER.info("Starting OpenCodeServerContainer...");
-        LOGGER.info("This may take several minutes on first run as the Docker image needs to be built");
+        LOGGER.info("Using pre-built Docker image: {}", IMAGE_NAME);
         try {
             super.start();
             LOGGER.info("OpenCodeServerContainer started successfully on port: {}", getMappedPort(OPENCODE_PORT));
