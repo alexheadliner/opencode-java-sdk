@@ -1,5 +1,8 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResourceTracker;
+import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.*;
@@ -13,9 +16,19 @@ public class FileOperationsExample {
     private static final Logger logger = LoggerFactory.getLogger(FileOperationsExample.class);
 
     private final OpenCodeClient client;
+    private final ResponseValidator validator;
+    private final ResourceTracker tracker;
 
     public FileOperationsExample(OpenCodeClient client) {
         this.client = client;
+        this.validator = null;
+        this.tracker = null;
+    }
+
+    public FileOperationsExample(ExampleContext context) {
+        this.client = context.getClient();
+        this.validator = context.getValidator();
+        this.tracker = context.getResourceTracker();
     }
 
     public void demonstrateFileOperations() {
@@ -58,10 +71,20 @@ public class FileOperationsExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateCollection(files, "files");
+        }
+
         logger.info("Found {} entries:", files.size());
         int fileCount = 0;
         int dirCount = 0;
         for (FileNode file : files) {
+            if (validator != null) {
+                validator.validateNonNull(file.getName(), "file name");
+                validator.validateNonNull(file.getPath(), "file path");
+                validator.validateNonNull(file.getType(), "file type");
+            }
+
             String type = file.getType() == FileNode.TypeEnum.DIRECTORY ? "[DIR]" : "[FILE]";
             logger.info("  {} {} - {}", type, file.getName(), file.getPath());
             if (file.getType() == FileNode.TypeEnum.DIRECTORY) {
@@ -82,6 +105,12 @@ public class FileOperationsExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateNonNull(content, "file content");
+            validator.validateNonNull(content.getType(), "content type");
+            validator.validateNonNull(content.getContent(), "content");
+        }
+
         logger.info("File Type: {}", content.getType());
         logger.info("MIME Type: {}", content.getMimeType());
         logger.info("Content Length: {} characters", content.getContent().length());
@@ -99,6 +128,10 @@ public class FileOperationsExample {
                 null,  // directory
                 null   // workspace
         );
+
+        if (validator != null) {
+            validator.validateCollection(files, "file status");
+        }
 
         if (files.isEmpty()) {
             logger.info("No modified files in git");
@@ -126,6 +159,10 @@ public class FileOperationsExample {
                 10     // limit
         );
 
+        if (validator != null) {
+            validator.validateCollection(files, "found files");
+        }
+
         logger.info("Found {} files matching '{}'", files.size(), pattern);
         for (String file : files) {
             logger.info("  - {}", file);
@@ -140,6 +177,10 @@ public class FileOperationsExample {
                 null,  // directory
                 null   // workspace
         );
+
+        if (validator != null) {
+            validator.validateCollection(results, "search results");
+        }
 
         logger.info("Found {} matches for '{}'", results.size(), searchPattern);
         int limit = Math.min(5, results.size());
@@ -164,10 +205,19 @@ public class FileOperationsExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateCollection(symbols, "symbols");
+        }
+
         logger.info("Found {} symbols matching '{}'", symbols.size(), query);
         int limit = Math.min(10, symbols.size());
         for (int i = 0; i < limit; i++) {
             Symbol symbol = symbols.get(i);
+            if (validator != null) {
+                validator.validateNonNull(symbol.getName(), "symbol name");
+                validator.validateNonNull(symbol.getKind(), "symbol kind");
+            }
+
             logger.info("  Symbol: {} (kind: {}) at {} - range: {}",
                     symbol.getName(),
                     symbol.getKind(),

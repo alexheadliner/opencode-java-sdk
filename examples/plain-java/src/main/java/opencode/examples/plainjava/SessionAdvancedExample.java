@@ -1,5 +1,8 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResourceTracker;
+import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.api.SessionApi;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.config.OpenCodeConfig;
@@ -17,11 +20,23 @@ public class SessionAdvancedExample {
 
     private final OpenCodeClient client;
     private final SessionApi sessionApi;
+    private final ResponseValidator validator;
+    private final ResourceTracker tracker;
 
     public SessionAdvancedExample(OpenCodeClient client) {
         this.client = client;
         ApiClient apiClient = client.getApiClient();
         this.sessionApi = new SessionApi(apiClient);
+        this.validator = null;
+        this.tracker = null;
+    }
+
+    public SessionAdvancedExample(ExampleContext context) {
+        this.client = context.getClient();
+        ApiClient apiClient = client.getApiClient();
+        this.sessionApi = new SessionApi(apiClient);
+        this.validator = context.getValidator();
+        this.tracker = context.getResourceTracker();
     }
 
     public void demonstrateAdvancedSessionOperations() {
@@ -80,6 +95,15 @@ public class SessionAdvancedExample {
                 request
         );
 
+        if (validator != null) {
+            validator.validateNonNull(session, "created session");
+            validator.validateNonNull(session.getId(), "session id");
+        }
+
+        if (tracker != null) {
+            tracker.trackSession(session.getId());
+        }
+
         logger.info("Session created successfully");
         return session.getId();
     }
@@ -96,6 +120,15 @@ public class SessionAdvancedExample {
                 null,
                 request
         );
+
+        if (validator != null) {
+            validator.validateNonNull(forkedSession, "forked session");
+            validator.validateNonNull(forkedSession.getId(), "forked session id");
+        }
+
+        if (tracker != null) {
+            tracker.trackSession(forkedSession.getId());
+        }
 
         logger.info("Session forked successfully. New session ID: {}", forkedSession.getId());
     }
@@ -169,8 +202,8 @@ public class SessionAdvancedExample {
         logger.info("\n--- Summarizing Session: {} ---", sessionId);
 
         SessionSummarizeRequest request = new SessionSummarizeRequest();
-        request.setProviderID("default");
-        request.setModelID("default");
+        request.setProviderID("z.ai");
+        request.setModelID("glm-4.7");
         request.setAuto(true);
 
         Boolean result = client.api().sessionSummarize(

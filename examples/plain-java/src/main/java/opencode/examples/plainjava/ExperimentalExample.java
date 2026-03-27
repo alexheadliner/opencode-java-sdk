@@ -1,5 +1,7 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.ExperimentalWorkspaceCreateRequest;
@@ -18,9 +20,16 @@ public class ExperimentalExample {
     private static final Logger logger = LoggerFactory.getLogger(ExperimentalExample.class);
 
     private final OpenCodeClient client;
+    private final ResponseValidator validator;
 
     public ExperimentalExample(OpenCodeClient client) {
         this.client = client;
+        this.validator = null;
+    }
+
+    public ExperimentalExample(ExampleContext context) {
+        this.client = context.getClient();
+        this.validator = context.getValidator();
     }
 
     public void demonstrateExperimentalApis() {
@@ -65,8 +74,16 @@ public class ExperimentalExample {
                 null   // archived
         );
 
+        if (validator != null) {
+            validator.validateCollection(sessions, "global sessions");
+        }
+
         logger.info("Found {} global sessions:", sessions.size());
         for (GlobalSession session : sessions) {
+            if (validator != null) {
+                validator.validateNonNull(session.getId(), "session id");
+            }
+
             logger.info("  - ID: {}, Title: {}",
                     session.getId(),
                     session.getTitle());
@@ -81,8 +98,16 @@ public class ExperimentalExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateCollection(workspaces, "workspaces");
+        }
+
         logger.info("Found {} workspaces:", workspaces.size());
         for (Workspace workspace : workspaces) {
+            if (validator != null) {
+                validator.validateNonNull(workspace.getId(), "workspace id");
+            }
+
             logger.info("  - ID: {}, Name: {}",
                     workspace.getId(),
                     workspace.getName());

@@ -1,5 +1,7 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.config.OpenCodeConfig;
 import opencode.sdk.invoker.ApiException;
@@ -17,9 +19,16 @@ public class VcsExample {
     private static final Logger logger = LoggerFactory.getLogger(VcsExample.class);
 
     private final OpenCodeClient client;
+    private final ResponseValidator validator;
 
     public VcsExample(OpenCodeClient client) {
         this.client = client;
+        this.validator = null;
+    }
+
+    public VcsExample(ExampleContext context) {
+        this.client = context.getClient();
+        this.validator = context.getValidator();
     }
 
     public void demonstrateVcsOperations() {
@@ -58,6 +67,11 @@ public class VcsExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateNonNull(vcsInfo, "vcs info");
+            validator.validateNonNull(vcsInfo.getBranch(), "branch");
+        }
+
         logger.info("VCS Info retrieved successfully:");
         logger.info("  Branch: {}", vcsInfo.getBranch());
     }
@@ -70,6 +84,10 @@ public class VcsExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateCollection(worktrees, "worktrees");
+        }
+
         logger.info("Found {} worktrees:", worktrees.size());
         for (String worktree : worktrees) {
             logger.info("  - {}", worktree);
@@ -79,22 +97,35 @@ public class VcsExample {
     private Worktree createWorktree(String name) throws ApiException {
         logger.info("\n--- Creating Worktree: {} ---", name);
 
-        WorktreeCreateInput input = new WorktreeCreateInput();
-        input.setName(name);
-        // startCommand is optional - leaving it null
+        try {
+            WorktreeCreateInput input = new WorktreeCreateInput();
+            input.setName(name);
+            // startCommand is optional - leaving it null
 
-        Worktree worktree = client.api().worktreeCreate(
-                null,   // directory
-                null,   // workspace
-                input
-        );
+            Worktree worktree = client.api().worktreeCreate(
+                    null,   // directory
+                    null,   // workspace
+                    input
+            );
 
-        logger.info("Worktree created successfully:");
-        logger.info("  Name: {}", worktree.getName());
-        logger.info("  Branch: {}", worktree.getBranch());
-        logger.info("  Directory: {}", worktree.getDirectory());
+            if (validator != null) {
+                validator.validateNonNull(worktree, "created worktree");
+                validator.validateNonNull(worktree.getName(), "worktree name");
+            }
 
-        return worktree;
+            logger.info("Worktree created successfully:");
+            logger.info("  Name: {}", worktree.getName());
+            logger.info("  Branch: {}", worktree.getBranch());
+            logger.info("  Directory: {}", worktree.getDirectory());
+
+            return worktree;
+        } catch (ApiException e) {
+            if (e.getCode() == 400 && e.getMessage().contains("WorktreeNotGitError")) {
+                logger.warn("Worktree creation skipped: Not a git repository");
+                return null;
+            }
+            throw e;
+        }
     }
 
     private void removeWorktree(String directory) throws ApiException {

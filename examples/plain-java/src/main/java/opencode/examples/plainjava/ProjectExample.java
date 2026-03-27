@@ -1,5 +1,7 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.config.OpenCodeConfig;
 import opencode.sdk.invoker.ApiException;
@@ -15,9 +17,16 @@ public class ProjectExample {
     private static final Logger logger = LoggerFactory.getLogger(ProjectExample.class);
 
     private final OpenCodeClient client;
+    private final ResponseValidator validator;
 
     public ProjectExample(OpenCodeClient client) {
         this.client = client;
+        this.validator = null;
+    }
+
+    public ProjectExample(ExampleContext context) {
+        this.client = context.getClient();
+        this.validator = context.getValidator();
     }
 
     public void demonstrateProjectOperations() {
@@ -52,8 +61,17 @@ public class ProjectExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateCollection(projects, "projects");
+        }
+
         logger.info("Found {} project(s):", projects.size());
         for (Project project : projects) {
+            if (validator != null) {
+                validator.validateNonNull(project.getId(), "project id");
+                validator.validateNonNull(project.getWorktree(), "project worktree");
+            }
+
             logger.info("  Project ID: {}", project.getId());
             logger.info("    Worktree: {}", project.getWorktree());
             if (project.getName() != null) {
@@ -78,6 +96,11 @@ public class ProjectExample {
                 null,  // directory
                 null   // workspace
         );
+
+        if (validator != null) {
+            validator.validateNonNull(project, "current project");
+            validator.validateNonNull(project.getId(), "project id");
+        }
 
         logger.info("Current project retrieved successfully!");
         logger.info("  Project ID: {}", project.getId());
@@ -111,6 +134,11 @@ public class ProjectExample {
                 null,           // workspace
                 updateRequest   // update request
         );
+
+        if (validator != null) {
+            validator.validateNonNull(updatedProject, "updated project");
+            validator.validateNonNull(updatedProject.getId(), "updated project id");
+        }
 
         logger.info("Project updated successfully!");
         logger.info("  Project ID: {}", updatedProject.getId());

@@ -1,5 +1,7 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.config.OpenCodeConfig;
 import opencode.sdk.invoker.ApiException;
@@ -17,9 +19,16 @@ public class ProviderExample {
     private static final Logger logger = LoggerFactory.getLogger(ProviderExample.class);
 
     private final OpenCodeClient client;
+    private final ResponseValidator validator;
 
     public ProviderExample(OpenCodeClient client) {
         this.client = client;
+        this.validator = null;
+    }
+
+    public ProviderExample(ExampleContext context) {
+        this.client = context.getClient();
+        this.validator = context.getValidator();
     }
 
     public void demonstrateProviders() {
@@ -49,12 +58,25 @@ public class ProviderExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateNonNull(response, "provider list response");
+        }
+
         List<ProviderList200ResponseAllInner> allProviders = response.getAll();
         List<String> connectedProviders = response.getConnected();
         Map<String, String> defaults = response.getDefault();
 
+        if (validator != null) {
+            validator.validateCollection(allProviders, "all providers");
+        }
+
         logger.info("Found {} providers:", allProviders.size());
         for (ProviderList200ResponseAllInner provider : allProviders) {
+            if (validator != null) {
+                validator.validateNonNull(provider.getId(), "provider id");
+                validator.validateNonNull(provider.getName(), "provider name");
+            }
+
             logger.info("  - ID: {}", provider.getId());
             logger.info("    Name: {}", provider.getName());
             if (provider.getApi() != null) {
@@ -87,6 +109,10 @@ public class ProviderExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateNonNull(authMethods, "auth methods");
+        }
+
         if (authMethods.isEmpty()) {
             logger.info("No auth methods configured.");
             return;
@@ -99,6 +125,10 @@ public class ProviderExample {
 
             logger.info("  Provider: {}", providerId);
             for (ProviderAuthMethod method : methods) {
+                if (validator != null) {
+                    validator.validateNonNull(method.getType(), "auth method type");
+                }
+
                 logger.info("    - Type: {}", method.getType());
                 logger.info("      Label: {}", method.getLabel());
             }

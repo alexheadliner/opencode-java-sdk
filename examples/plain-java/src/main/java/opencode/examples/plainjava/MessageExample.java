@@ -1,5 +1,8 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResourceTracker;
+import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.*;
@@ -14,9 +17,19 @@ public class MessageExample {
     private static final Logger logger = LoggerFactory.getLogger(MessageExample.class);
 
     private final OpenCodeClient client;
+    private final ResponseValidator validator;
+    private final ResourceTracker tracker;
 
     public MessageExample(OpenCodeClient client) {
         this.client = client;
+        this.validator = null;
+        this.tracker = null;
+    }
+
+    public MessageExample(ExampleContext context) {
+        this.client = context.getClient();
+        this.validator = context.getValidator();
+        this.tracker = context.getResourceTracker();
     }
 
     public void demonstrateMessaging() {
@@ -59,6 +72,15 @@ public class MessageExample {
                 request
         );
 
+        if (validator != null) {
+            validator.validateNonNull(session, "created session");
+            validator.validateNonNull(session.getId(), "session id");
+        }
+
+        if (tracker != null) {
+            tracker.trackSession(session.getId());
+        }
+
         logger.info("Session created for messaging: {}", session.getId());
         return session.getId();
     }
@@ -77,6 +99,10 @@ public class MessageExample {
                 null,  // workspace
                 request
         );
+
+        if (validator != null) {
+            validator.validateNonNull(response, "prompt response");
+        }
 
         // Log the AI's response
         if (response.getParts() != null && !response.getParts().isEmpty()) {
@@ -99,6 +125,10 @@ public class MessageExample {
                 null,   // workspace
                 new BigDecimal("20")  // limit - last 20 messages
         );
+
+        if (validator != null) {
+            validator.validateCollection(messages, "messages");
+        }
 
         logger.info("Total messages in session: {}", messages.size());
 

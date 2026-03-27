@@ -1,5 +1,7 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.config.OpenCodeConfig;
 import opencode.sdk.invoker.ApiException;
@@ -15,9 +17,16 @@ public class DevToolsExample {
     private static final Logger logger = LoggerFactory.getLogger(DevToolsExample.class);
 
     private final OpenCodeClient client;
+    private final ResponseValidator validator;
 
     public DevToolsExample(OpenCodeClient client) {
         this.client = client;
+        this.validator = null;
+    }
+
+    public DevToolsExample(ExampleContext context) {
+        this.client = context.getClient();
+        this.validator = context.getValidator();
     }
 
     public void demonstrateDevTools() {
@@ -47,8 +56,17 @@ public class DevToolsExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateCollection(lspStatuses, "lsp statuses");
+        }
+
         logger.info("Found {} LSP server(s):", lspStatuses.size());
         for (LSPStatus status : lspStatuses) {
+            if (validator != null) {
+                validator.validateNonNull(status.getId(), "lsp id");
+                validator.validateNonNull(status.getName(), "lsp name");
+            }
+
             logger.info("  - ID: {}", status.getId());
             logger.info("    Name: {}", status.getName());
             logger.info("    Root: {}", status.getRoot());
@@ -64,8 +82,16 @@ public class DevToolsExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateCollection(formatterStatuses, "formatter statuses");
+        }
+
         logger.info("Found {} formatter(s):", formatterStatuses.size());
         for (FormatterStatus status : formatterStatuses) {
+            if (validator != null) {
+                validator.validateNonNull(status.getName(), "formatter name");
+            }
+
             logger.info("  - Name: {}", status.getName());
             logger.info("    Extensions: {}", status.getExtensions());
             logger.info("    Enabled: {}", status.getEnabled());

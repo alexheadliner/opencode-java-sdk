@@ -1,5 +1,8 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResourceTracker;
+import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.config.OpenCodeConfig;
 import opencode.sdk.invoker.ApiException;
@@ -18,9 +21,19 @@ public class PtyExample {
     private static final Logger logger = LoggerFactory.getLogger(PtyExample.class);
 
     private final OpenCodeClient client;
+    private final ResponseValidator validator;
+    private final ResourceTracker tracker;
 
     public PtyExample(OpenCodeClient client) {
         this.client = client;
+        this.validator = null;
+        this.tracker = null;
+    }
+
+    public PtyExample(ExampleContext context) {
+        this.client = context.getClient();
+        this.validator = context.getValidator();
+        this.tracker = context.getResourceTracker();
     }
 
     public void demonstratePtyOperations() {
@@ -68,8 +81,16 @@ public class PtyExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateCollection(ptys, "pty sessions");
+        }
+
         logger.info("Found {} PTY sessions:", ptys.size());
         for (Pty pty : ptys) {
+            if (validator != null) {
+                validator.validateNonNull(pty.getId(), "pty id");
+            }
+
             logger.info("  - ID: {}", pty.getId());
             logger.info("    Title: {}", pty.getTitle());
             logger.info("    Command: {}", pty.getCommand());
@@ -91,6 +112,15 @@ public class PtyExample {
                 null,     // workspace
                 request
         );
+
+        if (validator != null) {
+            validator.validateNonNull(pty, "created pty");
+            validator.validateNonNull(pty.getId(), "pty id");
+        }
+
+        if (tracker != null) {
+            tracker.trackResource("pty", pty.getId());
+        }
 
         logger.info("PTY session created successfully:");
         logger.info("  ID: {}", pty.getId());

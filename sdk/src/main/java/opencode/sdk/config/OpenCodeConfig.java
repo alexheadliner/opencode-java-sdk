@@ -5,6 +5,11 @@ public class OpenCodeConfig {
     private String baseUrl = "http://localhost:4096";
     private String username;
     private String password;
+    
+    // LLM configuration fields
+    private String provider;
+    private String model;
+    private String providerApiKey;
 
     public OpenCodeConfig() {
     }
@@ -41,5 +46,29 @@ public class OpenCodeConfig {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getProviderApiKey() {
+        return providerApiKey;
+    }
+
+    public void setProviderApiKey(String providerApiKey) {
+        this.providerApiKey = providerApiKey;
     }
 }

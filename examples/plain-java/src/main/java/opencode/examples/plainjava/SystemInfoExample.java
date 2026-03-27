@@ -1,5 +1,7 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.config.OpenCodeConfig;
 import opencode.sdk.invoker.ApiException;
@@ -17,9 +19,16 @@ public class SystemInfoExample {
     private static final Logger logger = LoggerFactory.getLogger(SystemInfoExample.class);
 
     private final OpenCodeClient client;
+    private final ResponseValidator validator;
 
     public SystemInfoExample(OpenCodeClient client) {
         this.client = client;
+        this.validator = null;
+    }
+
+    public SystemInfoExample(ExampleContext context) {
+        this.client = context.getClient();
+        this.validator = context.getValidator();
     }
 
     public void demonstrateSystemInfo() {
@@ -52,6 +61,12 @@ public class SystemInfoExample {
 
         GlobalHealth200Response health = client.api().globalHealth();
 
+        if (validator != null) {
+            validator.validateNonNull(health, "health response");
+            validator.validateNonNull(health.getHealthy(), "healthy");
+            validator.validateNonNull(health.getVersion(), "version");
+        }
+
         logger.info("Health check successful!");
         logger.info("  Healthy: {}", health.getHealthy());
         logger.info("  Version: {}", health.getVersion());
@@ -65,8 +80,17 @@ public class SystemInfoExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateCollection(agents, "agents");
+        }
+
         logger.info("Found {} agents:", agents.size());
         for (Agent agent : agents) {
+            if (validator != null) {
+                validator.validateNonNull(agent.getName(), "agent name");
+                validator.validateNonNull(agent.getMode(), "agent mode");
+            }
+
             logger.info("  - Name: {}", agent.getName());
             if (agent.getDescription() != null) {
                 logger.info("    Description: {}", agent.getDescription());
@@ -86,8 +110,16 @@ public class SystemInfoExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateCollection(skills, "skills");
+        }
+
         logger.info("Found {} skills:", skills.size());
         for (AppSkills200ResponseInner skill : skills) {
+            if (validator != null) {
+                validator.validateNonNull(skill.getName(), "skill name");
+            }
+
             logger.info("  - Name: {}", skill.getName());
             logger.info("    Description: {}", skill.getDescription());
             logger.info("    Location: {}", skill.getLocation());
@@ -102,8 +134,16 @@ public class SystemInfoExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateCollection(commands, "commands");
+        }
+
         logger.info("Found {} commands:", commands.size());
         for (Command command : commands) {
+            if (validator != null) {
+                validator.validateNonNull(command.getName(), "command name");
+            }
+
             logger.info("  - Name: {}", command.getName());
             if (command.getDescription() != null) {
                 logger.info("    Description: {}", command.getDescription());

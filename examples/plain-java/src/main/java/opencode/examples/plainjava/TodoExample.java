@@ -1,5 +1,7 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.api.DefaultApi;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.invoker.ApiException;
@@ -16,10 +18,18 @@ public class TodoExample {
 
     private final OpenCodeClient client;
     private final DefaultApi api;
+    private final ResponseValidator validator;
 
     public TodoExample(OpenCodeClient client) {
         this.client = client;
         this.api = client.api();
+        this.validator = null;
+    }
+
+    public TodoExample(ExampleContext context) {
+        this.client = context.getClient();
+        this.api = client.api();
+        this.validator = context.getValidator();
     }
 
     public void demonstrateTodoOperations() {
@@ -68,12 +78,20 @@ public class TodoExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateCollection(todos, "todos");
+        }
+
         if (todos == null || todos.isEmpty()) {
             logger.info("No todos found for this session.");
             logger.info("Note: Todos are typically created during AI assistant interactions.");
         } else {
             logger.info("Found {} todos:", todos.size());
             for (Todo todo : todos) {
+                if (validator != null) {
+                    validator.validateNonNull(todo.getContent(), "todo content");
+                }
+
                 logger.info("  - Content: {}", todo.getContent());
                 logger.info("    Status: {}", todo.getStatus());
                 logger.info("    Priority: {}", todo.getPriority());

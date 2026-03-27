@@ -1,5 +1,8 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResourceTracker;
+import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.api.SessionApi;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.invoker.ApiClient;
@@ -19,12 +22,23 @@ public class SessionCrudExample {
 
     private final OpenCodeClient client;
     private final SessionApi sessionApi;
+    private final ResponseValidator validator;
+    private final ResourceTracker tracker;
 
     public SessionCrudExample(OpenCodeClient client) {
         this.client = client;
-        // Create SessionApi from the client's ApiClient
         ApiClient apiClient = client.getApiClient();
         this.sessionApi = new SessionApi(apiClient);
+        this.validator = null;
+        this.tracker = null;
+    }
+
+    public SessionCrudExample(ExampleContext context) {
+        this.client = context.getClient();
+        ApiClient apiClient = client.getApiClient();
+        this.sessionApi = new SessionApi(apiClient);
+        this.validator = context.getValidator();
+        this.tracker = context.getResourceTracker();
     }
 
     public void demonstrateSessionCrud() {
@@ -71,8 +85,16 @@ public class SessionCrudExample {
                 new BigDecimal("10")  // limit - max 10 sessions
         );
 
+        if (validator != null) {
+            validator.validateCollection(sessions, "sessions");
+        }
+
         logger.info("Found {} sessions:", sessions.size());
         for (Session session : sessions) {
+            if (validator != null) {
+                validator.validateNonNull(session.getId(), "session id");
+            }
+
             logger.info("  - ID: {}, Title: {}",
                     session.getId(),
                     session.getTitle());
@@ -91,6 +113,15 @@ public class SessionCrudExample {
                 request
         );
 
+        if (validator != null) {
+            validator.validateNonNull(session, "created session");
+            validator.validateNonNull(session.getId(), "session id");
+        }
+
+        if (tracker != null) {
+            tracker.trackSession(session.getId());
+        }
+
         logger.info("Session created successfully");
         return session.getId();
     }
@@ -103,6 +134,12 @@ public class SessionCrudExample {
                 null,  // directory
                 null   // workspace
         );
+
+        if (validator != null) {
+            validator.validateNonNull(session, "session");
+            validator.validateNonNull(session.getId(), "session id");
+            validator.validateNonNull(session.getTitle(), "session title");
+        }
 
         logger.info("Session Details:");
         logger.info("  ID: {}", session.getId());

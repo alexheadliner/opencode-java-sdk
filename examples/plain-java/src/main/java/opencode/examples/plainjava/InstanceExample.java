@@ -1,5 +1,7 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.config.OpenCodeConfig;
 import org.slf4j.Logger;
@@ -10,9 +12,16 @@ public class InstanceExample {
     private static final Logger logger = LoggerFactory.getLogger(InstanceExample.class);
 
     private final OpenCodeClient client;
+    private final ResponseValidator validator;
 
     public InstanceExample(OpenCodeClient client) {
         this.client = client;
+        this.validator = null;
+    }
+
+    public InstanceExample(ExampleContext context) {
+        this.client = context.getClient();
+        this.validator = context.getValidator();
     }
 
     public void demonstrateInstanceManagement() {

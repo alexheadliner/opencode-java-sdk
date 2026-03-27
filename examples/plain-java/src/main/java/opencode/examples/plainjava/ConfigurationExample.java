@@ -1,5 +1,7 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.config.OpenCodeConfig;
 import opencode.sdk.invoker.ApiException;
@@ -18,9 +20,16 @@ public class ConfigurationExample {
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationExample.class);
 
     private final OpenCodeClient client;
+    private final ResponseValidator validator;
 
     public ConfigurationExample(OpenCodeClient client) {
         this.client = client;
+        this.validator = null;
+    }
+
+    public ConfigurationExample(ExampleContext context) {
+        this.client = context.getClient();
+        this.validator = context.getValidator();
     }
 
     public void demonstrateConfiguration() {
@@ -56,6 +65,10 @@ public class ConfigurationExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateNonNull(config, "project config");
+        }
+
         logger.info("Project config retrieved successfully!");
         if (config.getModel() != null) {
             logger.info("  Model: {}", config.getModel());
@@ -78,6 +91,10 @@ public class ConfigurationExample {
         logger.info("\n--- Retrieving Global Configuration ---");
 
         Config config = client.api().globalConfigGet();
+
+        if (validator != null) {
+            validator.validateNonNull(config, "global config");
+        }
 
         logger.info("Global config retrieved successfully!");
         if (config.getServer() != null) {
@@ -102,11 +119,24 @@ public class ConfigurationExample {
                 null   // workspace
         );
 
+        if (validator != null) {
+            validator.validateNonNull(response, "providers response");
+        }
+
         List<Provider> providers = response.getProviders();
         Map<String, String> defaults = response.getDefault();
 
+        if (validator != null) {
+            validator.validateCollection(providers, "providers");
+        }
+
         logger.info("Found {} providers:", providers.size());
         for (Provider provider : providers) {
+            if (validator != null) {
+                validator.validateNonNull(provider.getId(), "provider id");
+                validator.validateNonNull(provider.getName(), "provider name");
+            }
+
             logger.info("  - ID: {}", provider.getId());
             logger.info("    Name: {}", provider.getName());
             logger.info("    Source: {}", provider.getSource());
@@ -136,6 +166,10 @@ public class ConfigurationExample {
                 null,           // workspace
                 configUpdate    // config changes
         );
+
+        if (validator != null) {
+            validator.validateNonNull(updatedConfig, "updated config");
+        }
 
         logger.info("Config updated successfully!");
         if (updatedConfig.getLogLevel() != null) {

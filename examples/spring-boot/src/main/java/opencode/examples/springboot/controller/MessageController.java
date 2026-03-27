@@ -1,6 +1,7 @@
 package opencode.examples.springboot.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import opencode.sdk.invoker.ApiException;
 import opencode.sdk.model.SessionMessages200ResponseInner;
 import opencode.sdk.model.SessionPrompt200Response;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/messages")
 @RequiredArgsConstructor
+@Slf4j
 public class MessageController {
 
     private final OpenCodeService openCodeService;

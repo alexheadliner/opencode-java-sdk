@@ -1,5 +1,7 @@
 package opencode.examples.plainjava;
 
+import opencode.examples.plainjava.testing.ExampleContext;
+import opencode.examples.plainjava.testing.ResponseValidator;
 import opencode.sdk.client.OpenCodeClient;
 import opencode.sdk.config.OpenCodeConfig;
 import opencode.sdk.invoker.ApiException;
@@ -15,9 +17,16 @@ public class InteractiveExample {
     private static final Logger logger = LoggerFactory.getLogger(InteractiveExample.class);
 
     private final OpenCodeClient client;
+    private final ResponseValidator validator;
 
     public InteractiveExample(OpenCodeClient client) {
         this.client = client;
+        this.validator = null;
+    }
+
+    public InteractiveExample(ExampleContext context) {
+        this.client = context.getClient();
+        this.validator = context.getValidator();
     }
 
     public void demonstrateInteractiveApis() {
