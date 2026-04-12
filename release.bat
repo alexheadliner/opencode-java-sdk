@@ -103,7 +103,9 @@ call :log_success "Docker container started successfully"
 goto :eof
 
 REM =============================================================================
-REM STEP 2: Health Check & Download OpenAPI JSON
+REM STEP 2: Health Check
+REM TODO: Re-enable download_openapi once server exposes full spec at /doc
+REM       (currently /doc returns incomplete spec without session/file/search endpoints)
 REM =============================================================================
 
 :wait_for_healthy
@@ -137,31 +139,32 @@ goto :health_loop
 
 goto :eof
 
-:download_openapi
-call :log_info "=== STEP 2b: Download OpenAPI JSON Spec ==="
-
-call :log_info "Downloading OpenAPI spec from %OPENAPI_URL%..."
-
-curl -sf -u %OPENCODE_USERNAME%:%OPENCODE_PASSWORD% "%OPENAPI_URL%" -o "%SDK_DIR%\openapi.json"
-if errorlevel 1 (
-    call :log_error "Failed to download OpenAPI spec"
-    exit /b 1
-)
-
-REM Validate the downloaded file
-if not exist "%SDK_DIR%\openapi.json" (
-    call :log_error "Downloaded OpenAPI file not found"
-    exit /b 1
-)
-
-for %%F in ("%SDK_DIR%\openapi.json") do set "file_size=%%~zF"
-if %file_size% equ 0 (
-    call :log_error "Downloaded OpenAPI file is empty"
-    exit /b 1
-)
-
-call :log_success "OpenAPI spec downloaded successfully (%file_size% bytes)"
-goto :eof
+REM TODO: Re-enable once server /doc endpoint returns full OpenAPI spec
+REM :download_openapi
+REM call :log_info "=== STEP 2b: Download OpenAPI JSON Spec ==="
+REM
+REM call :log_info "Downloading OpenAPI spec from %OPENAPI_URL%..."
+REM
+REM curl -sf -u %OPENCODE_USERNAME%:%OPENCODE_PASSWORD% "%OPENAPI_URL%" -o "%SDK_DIR%\openapi.json"
+REM if errorlevel 1 (
+REM     call :log_error "Failed to download OpenAPI spec"
+REM     exit /b 1
+REM )
+REM
+REM REM Validate the downloaded file
+REM if not exist "%SDK_DIR%\openapi.json" (
+REM     call :log_error "Downloaded OpenAPI file not found"
+REM     exit /b 1
+REM )
+REM
+REM for %%F in ("%SDK_DIR%\openapi.json") do set "file_size=%%~zF"
+REM if %file_size% equ 0 (
+REM     call :log_error "Downloaded OpenAPI file is empty"
+REM     exit /b 1
+REM )
+REM
+REM call :log_success "OpenAPI spec downloaded successfully (%file_size% bytes)"
+REM goto :eof
 
 REM =============================================================================
 REM STEP 3: Extract OpenCode Version from Container
@@ -304,8 +307,8 @@ if errorlevel 1 goto :error
 call :wait_for_healthy
 if errorlevel 1 goto :error
 
-call :download_openapi
-if errorlevel 1 goto :error
+REM call :download_openapi
+REM if errorlevel 1 goto :error
 
 call :extract_version
 if errorlevel 1 goto :error

@@ -89,7 +89,9 @@ rebuild_docker() {
 }
 
 # =============================================================================
-# STEP 2: Health Check & Download OpenAPI JSON
+# STEP 2: Health Check
+# TODO: Re-enable download_openapi once server exposes full spec at /doc
+#       (currently /doc returns incomplete spec without session/file/search endpoints)
 # =============================================================================
 
 wait_for_healthy() {
@@ -118,31 +120,32 @@ wait_for_healthy() {
     exit 1
 }
 
-download_openapi() {
-    log_info "=== STEP 2b: Download OpenAPI JSON Spec ==="
-
-    log_info "Downloading OpenAPI spec from ${OPENAPI_URL}..."
-
-    if ! curl -sf -u "${OPENCODE_USERNAME}:${OPENCODE_PASSWORD}" "${OPENAPI_URL}" -o "${SDK_DIR}/openapi.json"; then
-        log_error "Failed to download OpenAPI spec"
-        exit 1
-    fi
-
-    # Validate the downloaded file
-    if [[ ! -s "${SDK_DIR}/openapi.json" ]]; then
-        log_error "Downloaded OpenAPI file is empty"
-        exit 1
-    fi
-
-    if ! head -c 1 "${SDK_DIR}/openapi.json" | grep -q '{'; then
-        log_error "Downloaded file does not appear to be valid JSON"
-        exit 1
-    fi
-
-    local file_size
-    file_size=$(du -h "${SDK_DIR}/openapi.json" | cut -f1)
-    log_success "OpenAPI spec downloaded successfully (${file_size})"
-}
+# TODO: Re-enable once server /doc endpoint returns full OpenAPI spec
+# download_openapi() {
+#     log_info "=== STEP 2b: Download OpenAPI JSON Spec ==="
+#
+#     log_info "Downloading OpenAPI spec from ${OPENAPI_URL}..."
+#
+#     if ! curl -sf -u "${OPENCODE_USERNAME}:${OPENCODE_PASSWORD}" "${OPENAPI_URL}" -o "${SDK_DIR}/openapi.json"; then
+#         log_error "Failed to download OpenAPI spec"
+#         exit 1
+#     fi
+#
+#     # Validate the downloaded file
+#     if [[ ! -s "${SDK_DIR}/openapi.json" ]]; then
+#         log_error "Downloaded OpenAPI file is empty"
+#         exit 1
+#     fi
+#
+#     if ! head -c 1 "${SDK_DIR}/openapi.json" | grep -q '{'; then
+#         log_error "Downloaded file does not appear to be valid JSON"
+#         exit 1
+#     fi
+#
+#     local file_size
+#     file_size=$(du -h "${SDK_DIR}/openapi.json" | cut -f1)
+#     log_success "OpenAPI spec downloaded successfully (${file_size})"
+# }
 
 # =============================================================================
 # STEP 3: Extract OpenCode Version from Container
@@ -245,7 +248,8 @@ main() {
 
     rebuild_docker
     wait_for_healthy
-    download_openapi
+    # download_openapi
+    log_warning "Skipping OpenAPI spec download (server /doc returns incomplete spec)"
     extract_version
     update_version
     build_sdk

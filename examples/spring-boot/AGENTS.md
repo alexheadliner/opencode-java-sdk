@@ -178,7 +178,7 @@ mvn clean package
 mvn spring-boot:run
 
 # Or run the JAR
-java -jar target/opencode-examples-spring-boot-0.1.0-SNAPSHOT.jar
+java -jar target/opencode-examples-spring-boot-1.4.3-SNAPSHOT.jar
 ```
 
 ### Access the Application

@@ -88,7 +88,7 @@ mvn clean package
 ### Run
 ```bash
 # Run Main.java which executes all examples
-java -jar target/opencode-examples-plain-java-0.1.0-SNAPSHOT.jar
+java -jar target/opencode-examples-plain-java-1.4.3-SNAPSHOT.jar
 
 # Or with Maven
 mvn exec:java -Dexec.mainClass="opencode.examples.plainjava.Main"

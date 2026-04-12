@@ -141,11 +141,10 @@ The SDK is now auto-generated from OpenAPI specification and includes:
 - `ApiException` - API exception handling
 - `ApiResponse<T>` - Generic response wrapper
 
-**Custom Classes** (manual implementations in `src/main/java`)
-- `OpenCodeClient` - Custom HTTP client wrapper (in `client/` package)
-- `OpenCodeConfig` - Configuration properties (in `config/` package)
-- `OpenCodeException` - Base runtime exception (in root package)
+**Manual Workarounds** (in `src/main/java`)
 - `AnyOf` - Workaround for generator bug with `anyOf: [{}, {"type": "null"}]` schemas (in `model/` package)
+
+**Note:** All API, invoker, and model classes are auto-generated into `target/generated-sources/openapi/` at build time. Only `AnyOf.java` exists as a manual source file in `src/main/java/`.
 
 **Models** (`opencode.sdk.model`)
 - 150+ auto-generated model classes for requests, responses, and data structures
@@ -191,6 +190,14 @@ The Spring Boot example implements complete API coverage with 17 REST controller
 | Real-time | EventStreamingController (SSE), PtyController |
 
 See [`examples/spring-boot/AGENTS.md`](examples/spring-boot/AGENTS.md) for complete documentation.
+
+## Release Scripts
+
+The project includes release automation scripts:
+- `release.bat` - Windows release script
+- `release.sh` - Linux/macOS release script
+
+These scripts automate: Docker rebuild → OpenAPI spec download → version extraction → POM updates → SDK rebuild.
 
 ## Docker Infrastructure
 

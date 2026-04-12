@@ -61,8 +61,9 @@ This module USES Lombok. Use annotations for boilerplate reduction:
 @Setter
 @ConfigurationProperties(prefix = "opencode")
 public class OpenCodeProperties {
-    private String baseUrl = "http://localhost:8080";
-    private String apiKey;
+    private String baseUrl = "http://localhost:4096";
+    private String username;
+    private String password;
     private int timeout = 30;
 }
 
@@ -70,7 +71,8 @@ public class OpenCodeProperties {
 @Service
 @RequiredArgsConstructor
 public class OpenCodeService {
-    private final OpenCodeClient openCodeClient;
+    private final DefaultApi defaultApi;
+    private final ApiClient apiClient;
 }
 ```
 
@@ -80,8 +82,10 @@ public class OpenCodeService {
    ```java
    @Bean
    @ConditionalOnMissingBean
-   public OpenCodeClient openCodeClient(OpenCodeConfig config) {
-       return new OpenCodeClient(config);
+   public ApiClient apiClient(OpenCodeConfig config) {
+       ApiClient client = new ApiClient();
+       client.updateBaseUri(config.getBaseUrl());
+       return client;
    }
    ```
 
@@ -110,7 +114,8 @@ Prefix all properties with `opencode.*`:
 ```yaml
 opencode:
   base-url: http://localhost:4096
-  api-key: your-api-key
+  username: opencode
+  password: opencode123
   timeout: 30
 ```
 
@@ -128,8 +133,8 @@ opencode.sdk.springboot/
 | Dependency | Version | Scope | Purpose |
 |------------|---------|-------|---------|
 | OpenCode SDK | ${project.version} | compile | Core SDK library |
-| Spring Boot Starter Web | 3.5.12 | compile | Spring Boot web support |
-| Spring Boot Configuration Processor | 3.5.12 | provided | Configuration metadata |
+| Spring Boot Starter Web | 3.5.13 | compile | Spring Boot web support |
+| Spring Boot Configuration Processor | 3.5.13 | provided | Configuration metadata |
 | Lombok | 1.18.36 | provided | Boilerplate reduction |
 
 ## Auto-Configuration Registration
@@ -166,7 +171,7 @@ This enables IDE auto-completion for `opencode.*` properties.
 <dependency>
     <groupId>io.opencode</groupId>
     <artifactId>opencode-spring-boot-starter</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>${project.version}</version>
 </dependency>
 ```
 
@@ -175,7 +180,8 @@ This enables IDE auto-completion for `opencode.*` properties.
 ```yaml
 opencode:
   base-url: http://localhost:4096
-  api-key: ${OPENCODE_API_KEY}
+  username: ${OPENCODE_USERNAME}
+  password: ${OPENCODE_PASSWORD}
   timeout: 30
 ```
 
@@ -186,9 +192,10 @@ opencode:
 @RequiredArgsConstructor
 public class MyService {
     private final OpenCodeService openCodeService;
-    
-    public void doSomething() {
-        ApiResponse response = openCodeService.getData("/v1/resources");
+
+    public void doSomething() throws ApiException {
+        GlobalHealth200Response health = openCodeService.getHealth();
+        DefaultApi api = openCodeService.api();
     }
 }
 ```
@@ -197,7 +204,7 @@ public class MyService {
 
 - Do NOT create tests until directly asked
 - When testing auto-configuration, use `@TestConfiguration`
-- Mock `OpenCodeClient` for unit tests
+- Mock `ApiClient` or `DefaultApi` for unit tests
 - Use `@SpringBootTest` for integration tests
 
 ## Spring Boot Best Practices
@@ -212,11 +219,12 @@ public class MyService {
 
 The starter depends on the SDK module and:
 1. Creates `OpenCodeConfig` bean from properties
-2. Creates `OpenCodeClient` bean with configuration
-3. Exposes `OpenCodeService` as a convenience wrapper
+2. Creates `ApiClient` bean with Basic Auth configuration
+3. Creates `DefaultApi` bean from `ApiClient`
+4. Exposes `OpenCodeService` as a convenience wrapper
 
 ## Version Compatibility
 
-- Spring Boot: 3.5.12+
+- Spring Boot: 3.5.13+
 - Java: 21+
 - Aligns with SDK module version

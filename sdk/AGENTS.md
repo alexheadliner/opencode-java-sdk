@@ -1,153 +1,191 @@
 # OpenCode SDK Module
 
-Core SDK library for OpenCode API client - plain Java library without Lombok for maximum compatibility.
+Core SDK library for OpenCode API client — fully auto-generated from OpenAPI specification.
 
 ## Purpose
 
-This module provides the foundational HTTP client library for communicating with the OpenCode server API. It is designed as a plain Java library without Lombok to ensure compatibility with all Java projects, including those that don't use Lombok.
+This module provides the foundational HTTP client library for communicating with the OpenCode server API. The entire SDK (API classes, models, and infrastructure) is **auto-generated** from the OpenAPI specification using OpenAPI Generator. Only a single manual workaround file (`AnyOf.java`) is maintained in `src/main/java`.
 
 ## Architecture
 
 ```mermaid
 flowchart TB
-    subgraph "SDK Module"
-        API["api/<br/>DefaultApi, SessionApi<br/>OpenAPI-generated APIs"]
-        CLIENT["client/<br/>OpenCodeClient"]
-        CONFIG["config/<br/>OpenCodeConfig"]
-        INVOKER["invoker/<br/>ApiClient, Configuration<br/>OpenAPI Infrastructure"]
+    subgraph "OpenAPI Spec"
+        SPEC["openapi.json<br/>API Definition"]
+    end
+
+    subgraph "Build Pipeline"
+        GEN["openapi-generator-maven-plugin<br/>v7.21.0"]
+        FIX["maven-antrun-plugin<br/>Bug Fixes"]
+        COMPILE["maven-compiler-plugin"]
+    end
+
+    subgraph "Generated Sources (target/generated-sources/openapi/)"
+        API["api/<br/>DefaultApi"]
+        INVOKER["invoker/<br/>ApiClient, Configuration<br/>ApiException, JSON, etc."]
         MODELS["model/<br/>150+ Generated Models"]
-        EXCEPTION["OpenCodeException"]
+    end
+
+    subgraph "Manual Sources (src/main/java/)"
+        ANYOF["model/AnyOf.java<br/>Generator bug workaround"]
     end
 
     subgraph "Dependencies"
-        HTTP["java.net.http<br/>HttpClient"]
-        JACKSON["Jackson<br/>JSON Processing"]
-        SLF4J["SLF4J<br/>Logging"]
+        JACKSON["Jackson 2.21.1<br/>JSON Processing"]
+        SLF4J["SLF4J 2.0.16<br/>Logging"]
+        JAKARTA["Jakarta Annotations 2.1.1"]
+        JSR310["Jackson JSR310<br/>Date/Time Support"]
     end
 
-    API --> INVOKER
-    API --> MODELS
-    CLIENT --> CONFIG
-    CLIENT --> HTTP
-    CLIENT --> JACKSON
-    CLIENT --> SLF4J
-    INVOKER --> HTTP
+    SPEC --> GEN
+    GEN --> API
+    GEN --> INVOKER
+    GEN --> MODELS
+    API --> FIX
+    INVOKER --> FIX
+    MODELS --> FIX
+    FIX --> COMPILE
+    ANYOF --> COMPILE
     INVOKER --> JACKSON
     MODELS --> JACKSON
-    EXCEPTION --> CLIENT
+    MODELS --> JSR310
+    API --> JAKARTA
 
-    style API fill:#c8e6c9
-    style CLIENT fill:#e8f5e9
-    style CONFIG fill:#e3f2fd
-    style INVOKER fill:#fff3e0
-    style MODELS fill:#f3e5f5
-    style EXCEPTION fill:#ffebee
+    style SPEC fill:#fff9c4
+    style GEN fill:#e8f5e9
+    style FIX fill:#fff3e0
+    style COMPILE fill:#e3f2fd
+    style ANYOF fill:#ffebee
 ```
 
 ## Key Classes
 
-| Class | Package | Description |
-|-------|---------|-------------|
-| [`DefaultApi`](api/DefaultApi.java) | `opencode.sdk.api` | Auto-generated API class - main entry point for all API calls |
-| [`SessionApi`](api/SessionApi.java) | `opencode.sdk.api` | Auto-generated session-specific API methods |
-| [`OpenCodeClient`](client/OpenCodeClient.java) | `opencode.sdk.client` | Custom HTTP client wrapper |
-| [`OpenCodeConfig`](config/OpenCodeConfig.java) | `opencode.sdk.config` | Configuration properties |
-| [`ApiClient`](invoker/ApiClient.java) | `opencode.sdk.invoker` | OpenAPI-generated base HTTP client |
-| [`Configuration`](invoker/Configuration.java) | `opencode.sdk.invoker` | Global SDK configuration |
-| [`ApiResponse`](model/ApiResponse.java) | `opencode.sdk.model` | Standard API response wrapper |
-| [`OpenCodeException`](OpenCodeException.java) | `opencode.sdk` | Base runtime exception for SDK errors |
+All classes below are **auto-generated** from `openapi.json` unless marked as manual.
+
+| Class | Package | Source | Description |
+|-------|---------|--------|-------------|
+| `DefaultApi` | `opencode.sdk.api` | Generated | Main API class — entry point for all API calls |
+| `ApiClient` | `opencode.sdk.invoker` | Generated | Base HTTP client for all API calls |
+| `Configuration` | `opencode.sdk.invoker` | Generated | Global SDK configuration |
+| `ApiException` | `opencode.sdk.invoker` | Generated | API exception handling |
+| `ApiResponse<T>` | `opencode.sdk.invoker` | Generated | Generic response wrapper (invoker) |
+| `JSON` | `opencode.sdk.invoker` | Generated | JSON serialization/deserialization |
+| `Pair` | `opencode.sdk.invoker` | Generated | Key-value utility |
+| `ServerConfiguration` | `opencode.sdk.invoker` | Generated | Server configuration |
+| `ServerVariable` | `opencode.sdk.invoker` | Generated | Server variable definition |
+| `AnyOf` | `opencode.sdk.model` | **Manual** | Workaround for generator bug with `anyOf: [{}, {"type": "null"}]` schemas |
+| 150+ models | `opencode.sdk.model` | Generated | Data models for requests, responses, and data structures |
 
 ## Code Style Guidelines
 
 ### NO Lombok
-This module does NOT use Lombok. All classes must use explicit getters and setters:
-
-```java
-// CORRECT - Explicit getters/setters
-public class OpenCodeConfig {
-    private String baseUrl;
-    
-    public String getBaseUrl() {
-        return baseUrl;
-    }
-    
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
-}
-
-// INCORRECT - Do not use Lombok
-@Getter @Setter
-public class OpenCodeConfig {
-    private String baseUrl;
-}
-```
+This module does NOT use Lombok. All generated classes use explicit getters and setters.
 
 ### Class Organization
 - Do NOT create inner classes
 - Create separate classes in the same package instead
-- Keep classes under 200 lines when possible
+- Keep classes under 200 lines when possible (does not apply to generated code)
 - One public class per file
 
 ## Package Structure
 
 ```
-opencode.sdk/
-├── OpenCodeException.java           # Base exception
-├── api/                             # OpenAPI-generated API classes
-│   ├── DefaultApi.java              # Main API methods
-│   └── SessionApi.java              # Session-specific methods
-├── client/
-│   └── OpenCodeClient.java          # HTTP client
-├── config/
-│   └── OpenCodeConfig.java          # Configuration
-├── invoker/                         # OpenAPI infrastructure
-│   ├── ApiClient.java               # Base HTTP client
-│   ├── ApiException.java            # API exception
-│   ├── ApiResponse.java             # Response wrapper
-│   ├── Configuration.java           # SDK configuration
-│   ├── Pair.java                    # Key-value utility
-│   ├── ServerConfiguration.java     # Server config
-│   └── ServerVariable.java          # Server variable
-└── model/                           # 150+ generated models
-    ├── ApiResponse.java             # Response model
-    ├── Config.java                  # Configuration model
-    ├── Session.java                 # Session model
-    └── ... (150+ additional models)
+sdk/
+├── openapi.json                                    # OpenAPI specification (source of truth)
+├── pom.xml                                         # Build configuration with openapi-generator
+├── src/
+│   ├── main/
+│   │   ├── java/opencode/sdk/
+│   │   │   └── model/
+│   │   │       └── AnyOf.java                      # Manual workaround (ONLY manual file)
+│   │   └── resources/
+│   │       └── .openapi-generator-ignore            # Excludes docs/ from generation
+│   └── test/                                       # Tests (if any)
+└── target/
+    └── generated-sources/openapi/src/main/java/opencode/sdk/
+        ├── api/
+        │   └── DefaultApi.java                     # Generated API class
+        ├── invoker/                                # Generated infrastructure
+        │   ├── ApiClient.java
+        │   ├── ApiException.java
+        │   ├── ApiResponse.java
+        │   ├── Configuration.java
+        │   ├── JSON.java
+        │   ├── Pair.java
+        │   ├── RFC3339DateFormat.java
+        │   ├── RFC3339InstantDeserializer.java
+        │   ├── RFC3339JavaTimeModule.java
+        │   ├── ServerConfiguration.java
+        │   └── ServerVariable.java
+        └── model/                                  # 150+ generated model classes
+            ├── AbstractOpenApiSchema.java
+            ├── Agent.java
+            ├── Config.java
+            ├── Event.java
+            ├── Session.java
+            └── ... (150+ additional models)
 ```
 
 ## OpenAPI Code Generation
 
-### Generated Packages
-The following packages contain **auto-generated code** from the OpenAPI specification and **should not be manually edited**:
+### Build Pipeline
 
-- **`opencode.sdk.api/`** - API endpoint classes ([`DefaultApi`](api/DefaultApi.java), [`SessionApi`](api/SessionApi.java))
-- **`opencode.sdk.invoker/`** - OpenAPI infrastructure classes ([`ApiClient`](invoker/ApiClient.java), [`Configuration`](invoker/Configuration.java), [`ApiException`](invoker/ApiException.java), [`Pair`](invoker/Pair.java), [`ServerConfiguration`](invoker/ServerConfiguration.java), [`ServerVariable`](invoker/ServerVariable.java))
-- **`opencode.sdk.model/`** - 150+ data model classes representing API request/response schemas
+The SDK build (`mvn compile -pl sdk` or `mvn compile` from `sdk/`) runs three phases automatically:
+
+1. **`openapi-generator-maven-plugin` (v7.21.0)** — generates Java sources from `sdk/openapi.json` into `target/generated-sources/openapi/`
+   - Generator: `java` with `library: native`
+   - API package: `opencode.sdk.api`
+   - Model package: `opencode.sdk.model`
+   - Invoker package: `opencode.sdk.invoker`
+   - Uses Jakarta EE annotations, Java 8 date library
+   - Skips generation of tests and documentation
+
+2. **`maven-antrun-plugin` (v3.1.0)** — post-processes generated sources to fix known generator bugs:
+   - Replaces `Map<K,V>.class` → `Map.class` (parameterized type literals are invalid Java)
+   - Replaces `List<Object>.class` → `List.class`
+   - Replaces `getMap<K,V>()` → `getMap()` (generics in method identifiers are invalid Java)
+   - Replaces `getList<Object>()` → `getList()`
+
+3. **`maven-compiler-plugin`** — compiles generated sources + `src/main/java/` together
+
+### Known Generator Bugs Requiring Manual Workarounds
+
+| Bug | Description | Fix |
+|-----|-------------|-----|
+| **Map<K,V>.class syntax** | Generator outputs `Map<String, FooValue>.class` in `anyOf` schemas containing map types | Fixed automatically by antrun plugin |
+| **Missing `AnyOf` class** | Generator references `AnyOf` for schemas like `anyOf: [{}, {"type": "null"}]` but never generates the class | Manual `AnyOf.java` maintained in `src/main/java/opencode/sdk/model/` |
+
+### Generated vs Manual Code
+
+| Type | Location | Editable |
+|------|----------|----------|
+| API classes (`api/`) | `target/generated-sources/openapi/` | No — regenerated on build |
+| Invoker classes (`invoker/`) | `target/generated-sources/openapi/` | No — regenerated on build |
+| Model classes (`model/`) | `target/generated-sources/openapi/` | No — regenerated on build |
+| `AnyOf.java` (`model/`) | `src/main/java/` | Yes — manual workaround |
+| `.openapi-generator-ignore` | `src/main/resources/` | Yes — controls what gets generated |
 
 ### Regenerating Code
-To regenerate the OpenAPI code:
 
 ```bash
+# Regenerate from sdk directory
 cd sdk
 mvn clean generate-sources
+
+# Or from project root
+mvn generate-sources -pl sdk -am
+
+# Full rebuild (regenerate + compile)
+cd sdk
+mvn clean compile
 ```
 
-The OpenAPI specification is located at `sdk/src/main/resources/openapi.json`.
+The OpenAPI specification is located at `sdk/openapi.json`.
 
-### Custom Development
-Only modify code in these packages:
-- **`opencode.sdk.client/`** - Custom wrapper classes
-- **`opencode.sdk.config/`** - Custom configuration classes
-- **Root package** - Custom exception classes
+## API Package (opencode.sdk.api)
 
-## API Packages
+### DefaultApi
 
-### opencode.sdk.api
-
-Contains OpenAPI-generated API classes with 50+ endpoint methods:
-
-#### DefaultApi
 Main API class with comprehensive endpoint coverage:
 
 **Application Endpoints:**
@@ -246,22 +284,16 @@ Main API class with comprehensive endpoint coverage:
 - `tuiSelectSession()` - Select session in TUI
 - `tuiShowToast()` - Show toast notification
 
-#### SessionApi
-Session-specific API operations:
+## Invoker Package (opencode.sdk.invoker)
 
-- `sessionChildren()` - Get session children
-- `sessionGet()` - Get session details
-
-## Invoker Package
-
-Contains OpenAPI infrastructure classes:
+Contains OpenAPI infrastructure classes (all auto-generated):
 
 ### ApiClient
 Base HTTP client for API communication. Handles:
 - HTTP connection management
 - Request/response serialization
-- Authentication
-- Retry logic
+- Authentication (including Basic Auth via `setRequestInterceptor`)
+- Server configuration
 
 ### Configuration
 Global SDK configuration class:
@@ -282,40 +314,35 @@ Generic wrapper for API responses:
 - Response headers
 - Deserialized response body
 
+### JSON
+Jackson-based JSON serialization/deserialization for API requests and responses.
+
 ### Pair
 Key-value utility class for query parameters and headers.
 
-### ServerConfiguration
-Server configuration with:
-- URL template
-- Variables for server configuration
-- Multiple server support
+### ServerConfiguration / ServerVariable
+Server configuration with URL templates and variables for multi-server support.
 
-### ServerVariable
-Server variable definition for configuration templates.
-
-## Model Package
+## Model Package (opencode.sdk.model)
 
 Contains 150+ generated model classes representing:
-- API requests (e.g., [`SessionPromptRequest`](model/SessionPromptRequest.java), [`SessionCreateRequest`](model/SessionCreateRequest.java))
-- API responses (e.g., [`Session`](model/Session.java), [`Config`](model/Config.java), [`GlobalHealth200Response`](model/GlobalHealth200Response.java))
-- Data structures (e.g., [`Message`](model/Message.java), [`Part`](model/Part.java), [`FilePart`](model/FilePart.java))
-- Configuration models (e.g., [`ProviderConfig`](model/ProviderConfig.java), [`Model`](model/Model.java))
-- Event models (e.g., [`Event`](model/Event.java), [`EventSessionCreated`](model/EventSessionCreatedProperties.java))
-- Error models (e.g., [`APIError`](model/APIError.java), [`BadRequestError`](model/BadRequestError.java))
+- API requests (e.g., `SessionPromptRequest`, `SessionCreateRequest`)
+- API responses (e.g., `Session`, `Config`, `GlobalHealth200Response`)
+- Data structures (e.g., `Message`, `Part`, `FilePart`)
+- Configuration models (e.g., `ProviderConfig`, `Model`)
+- Event models (e.g., `Event`, `EventSessionCreated`)
+- Error models (e.g., `APIError`, `BadRequestError`)
 
 ### Error Handling
-- Extend `OpenCodeException` for all SDK-specific exceptions
-- Use checked exceptions only when caller can reasonably recover
+- Use `ApiException` from the invoker package for API-level errors
 - Use SLF4J for logging, never System.out
 
 ```java
 // Correct error handling
 try {
-    // API call
-} catch (IOException e) {
-    logger.error("Failed to connect to OpenCode server: {}", e.getMessage());
-    throw new OpenCodeException("Connection failed: " + e.getMessage());
+    GlobalHealth200Response health = api.globalHealth();
+} catch (ApiException e) {
+    logger.error("API call failed: {} (status {})", e.getMessage(), e.getCode());
 }
 ```
 
@@ -323,68 +350,70 @@ try {
 
 | Dependency | Version | Scope | Purpose |
 |------------|---------|-------|---------|
-| Jackson Databind | 2.18.2 | compile | JSON serialization/deserialization |
-| Jackson Annotations | 2.18.2 | compile | Jackson annotations |
-| Jackson Core | 2.18.2 | compile | Jackson core functionality |
+| Jackson Databind | 2.21.1 | compile | JSON serialization/deserialization |
+| Jackson Annotations | 2.21 | compile | Jackson annotations for generated code |
+| Jackson Core | 2.21.1 | compile | Jackson core functionality |
+| Jackson Datatype JSR310 | 2.21.1 | compile | Java 8 date/time support for generated code |
+| Jakarta Annotation API | 2.1.1 | compile | Jakarta annotations for generated code |
 | SLF4J API | 2.0.16 | compile | Logging facade |
 | JUnit Jupiter | 5.11.4 | test | Unit testing |
 | AssertJ | 3.26.3 | test | Fluent assertions |
-| OpenAPI Generator | 7.10.0 | provided | Code generation |
+| OpenAPI Generator | 7.21.0 | plugin | Code generation |
+| Maven AntRun Plugin | 3.1.0 | plugin | Post-processing generated sources |
 
 ## Build Commands
 
 ```bash
-# Compile SDK module
-mvn clean compile
+# Compile SDK module (generates + compiles)
+cd sdk && mvn clean compile
 
-# Generate OpenAPI code
-mvn clean generate-sources
+# Compile from project root
+mvn compile -pl sdk -am
+
+# Generate sources only (no compile)
+cd sdk && mvn generate-sources
 
 # Run tests
-mvn test
+cd sdk && mvn test
 
 # Install to local repository
-mvn clean install
+cd sdk && mvn clean install
 
 # Skip tests during install
-mvn clean install -DskipTests
+cd sdk && mvn clean install -DskipTests
 ```
 
-## HTTP Implementation Guidelines
+## Usage Example
 
-When implementing HTTP methods in `OpenCodeClient`:
+```java
+import opencode.sdk.api.DefaultApi;
+import opencode.sdk.invoker.ApiClient;
+import opencode.sdk.invoker.ApiException;
+import opencode.sdk.model.GlobalHealth200Response;
 
-1. **Use Java 11+ HttpClient**
-   ```java
-   private final HttpClient httpClient = HttpClient.newHttpClient();
-   ```
+// Create client with Basic Auth
+ApiClient apiClient = new ApiClient();
+apiClient.updateBaseUri("http://localhost:4096");
+String auth = Base64.getEncoder().encodeToString("opencode:opencode123".getBytes());
+apiClient.setRequestInterceptor(builder -> builder.header("Authorization", "Basic " + auth));
 
-2. **Support Async Operations**
-   - Provide both synchronous and asynchronous methods
-   - Use `CompletableFuture` for async operations
+// Create API instance
+DefaultApi api = new DefaultApi(apiClient);
 
-3. **Handle Authentication**
-   - Read API key from `OpenCodeConfig`
-   - Add Authorization header to all requests
-
-4. **JSON Processing**
-   - Use Jackson `ObjectMapper` for JSON parsing
-   - Create specific model classes for each API endpoint
-
-5. **Timeout Configuration**
-   - Respect timeout settings from `OpenCodeConfig`
-   - Default timeout: 30 seconds
+// Call API
+GlobalHealth200Response health = api.globalHealth();
+```
 
 ## Testing
 
 - Do NOT create tests until directly asked
 - When testing, use JUnit 5 and AssertJ
-- Mock external HTTP calls
+- Mock `ApiClient` or use integration tests against a running server
 - Test configuration validation
 
 ## API Reference
 
-Reference the OpenAPI specification at `src/main/resources/openapi.json` for:
+Reference the OpenAPI specification at `sdk/openapi.json` for:
 - Available endpoints
 - Request/response schemas
 - Authentication requirements
@@ -392,7 +421,6 @@ Reference the OpenAPI specification at `src/main/resources/openapi.json` for:
 
 ## Version Compatibility
 
-This SDK module maintains backward compatibility:
-- Public APIs should not change in patch releases
-- Deprecated methods should be marked with `@Deprecated`
-- Follow semantic versioning for breaking changes
+- Java 21+
+- No Lombok dependency
+- Compatible with any Java project (no framework dependencies beyond Jackson and SLF4J)

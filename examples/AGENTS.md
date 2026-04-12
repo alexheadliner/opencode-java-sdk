@@ -104,7 +104,7 @@ cd examples/spring-boot && mvn clean package
 cd examples/spring-boot && mvn test
 
 # Run plain Java example
-java -jar examples/plain-java/target/opencode-examples-plain-java-0.1.0-SNAPSHOT.jar
+java -jar examples/plain-java/target/opencode-examples-plain-java-1.4.3-SNAPSHOT.jar
 ```
 
 ## Example Guidelines
