@@ -6,7 +6,7 @@ Demonstrates Spring Boot integration with OpenCode SDK Starter.
 
 This example shows how to use the OpenCode Spring Boot Starter in a Spring Boot application. It demonstrates:
 - Auto-configuration of SDK beans
-- Configuration via application.yml
+- Configuration via application.properties
 - REST controller injection of OpenCodeService
 - Environment-based configuration
 
@@ -22,7 +22,7 @@ flowchart TB
 
     subgraph "Starter Auto-Configuration"
         AUTO["OpenCodeAutoConfiguration"]
-        CLIENT["OpenCodeClient"]
+        CLIENT["ApiClient"]
     end
 
     APP --> CTRL
@@ -133,31 +133,35 @@ public class OpenCodeController {
 | Dependency | Scope | Purpose |
 |------------|-------|---------|
 | OpenCode Spring Boot Starter | compile | SDK auto-configuration |
-| Spring Boot Starter Web | compile | Web framework |
+| Spring Boot Starter WebMvc | compile | Web framework (renamed from `spring-boot-starter-web` in Spring Boot 4.0) |
+| Spring Boot Jackson 2 | compile | Jackson 2 compatibility module (Jackson 3 migration deferred) |
+| Spring Boot Starter Validation | compile | Request validation |
 | Lombok | provided | Boilerplate reduction |
-| Spring Boot Starter Test | test | Testing support |
+| Spring Boot Starter Test Classic | test | Testing support (intermediate migration step from `spring-boot-starter-test`) |
+| TestContainers (1.20.4) | test | Docker container management |
+| TestContainers JUnit Jupiter (1.20.4) | test | TestContainers JUnit 5 integration |
 
 ## Configuration
 
-### application.yml
+### application.properties
 
-```yaml
-opencode:
-  base-url: http://localhost:4096
-  api-key: ${OPENCODE_API_KEY:default-key}
-  timeout: 30
+```properties
+server.port=8080
 
-server:
-  port: 8081
+opencode.base-url=http://localhost:4096
+opencode.username=opencode
+opencode.password=opencode123
+opencode.project-path=${user.dir}
 ```
 
 ### Environment Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `OPENCODE_API_KEY` | API authentication key | - |
+| `OPENCODE_USERNAME` | HTTP Basic Auth username | opencode |
+| `OPENCODE_PASSWORD` | HTTP Basic Auth password | opencode123 |
 | `OPENCODE_BASE_URL` | OpenCode server URL | http://localhost:4096 |
-| `SERVER_PORT` | Application port | 8081 |
+| `SERVER_PORT` | Application port | 8080 |
 
 ## Build and Run
 
@@ -184,10 +188,10 @@ java -jar target/opencode-examples-spring-boot-1.4.3-SNAPSHOT.jar
 ### Access the Application
 
 Once running:
-- Application: http://localhost:8081
-- Health Check: http://localhost:8081/api/system/health
-- Skills: http://localhost:8081/api/system/skills
-- Sessions: http://localhost:8081/api/sessions
+- Application: http://localhost:8080
+- Health Check: http://localhost:8080/api/system/health
+- Skills: http://localhost:8080/api/system/skills
+- Sessions: http://localhost:8080/api/sessions
 
 ## HTTP Test Files
 
@@ -208,7 +212,7 @@ HTTP test files are available in the `http/` directory at the project root for t
 - `http/mcp.http` - MCP server management
 - `http/todo.http` - Todo operations
 - `http/vcs.http` - Version control operations
-- `http/event-streaming.http` - SSE event streaming
+- `http/events.http` - SSE event streaming
 - `http/pty.http` - PTY operations
 
 ## Project Structure
@@ -236,8 +240,7 @@ src/main/java/opencode/examples/springboot/
     └── PtyController.java                 # /api/pty
 
 src/main/resources/
-├── application.yml                         # Configuration
-└── application-dev.yml                     # Dev profile (optional)
+└── application.properties                 # Configuration
 ```
 
 ## Key Classes
@@ -245,7 +248,7 @@ src/main/resources/
 ### OpenCodeSpringBootApplication
 - Standard Spring Boot main class
 - Uses `@SpringBootApplication`
-- Runs on port 8081 (to avoid conflict with OpenCode server on 4096)
+- Runs on port 8080 (to avoid conflict with OpenCode server on 4096)
 
 ### Controllers
 - REST controllers with `/api` base path
@@ -363,15 +366,15 @@ void shouldReturnHealthStatusWhenServerIsRunning() {
 
 #### Commands
 
-**Run all integration tests:**
+**Run unit tests only (excludes IT tests by default):**
 ```bash
 cd examples/spring-boot
-mvn clean verify
+mvn clean test
 ```
 
-**Run tests with specific profile:**
+**Run all tests including integration tests:**
 ```bash
-mvn clean verify -P integration-tests
+mvn clean test -DrunIntegrationTests
 ```
 
 **Run specific test class:**
@@ -384,14 +387,16 @@ mvn test -Dtest=SystemInfoControllerIT
 mvn test -Dtest=SystemInfoControllerIT -Dmaven.surefire.debug
 ```
 
-**Skip integration tests (run only unit tests):**
+**Skip integration tests explicitly:**
 ```bash
 mvn clean test -DskipITs=true
 ```
 
 #### Profile Activation
 
-The tests use the `test` profile activated by `@ActiveProfiles("test")` on the base class. This loads:
+The `integration-tests` profile is activated by setting the `runIntegrationTests` system property (`-DrunIntegrationTests`). When active, the Surefire plugin includes `**/*IT.java` files in test execution. By default, only `**/*Test.java` files are run.
+
+Tests use the `test` profile activated by `@ActiveProfiles("test")` on the base class. This loads:
 - [`application-test.properties`](src/test/resources/application-test.properties)
 - Test-specific beans and configuration
 
@@ -422,6 +427,12 @@ spring.main.banner-mode=off
 
 **Location:** [`src/test/resources/application-test.properties`](src/test/resources/application-test.properties)
 
+#### Spring Boot 4.0 Test Migration Notes
+
+- **TestRestTemplate**: In Spring Boot 4.0, `TestRestTemplate` has moved to `org.springframework.boot.test.web.client` and requires `@AutoConfigureTestRestTemplate` annotation instead of `@Autowired`. The `AbstractIntegrationTest` base class uses `@AutoConfigureTestRestTemplate` for injection.
+- **Test Starter**: Uses `spring-boot-starter-test-classic` as an intermediate migration step. The full migration to individual modular test starters is deferred.
+- **Jackson 2 Compat**: The `spring-boot-jackson2` module provides Jackson 2 compatibility under Spring Boot 4.0 (Jackson 3 migration deferred).
+
 #### Environment Variables
 
 | Variable | Description | Default |
@@ -439,14 +450,49 @@ The TestContainers setup configures the OpenCode server with:
 - **Health Check:** Waits for `/global/health` returning HTTP 200
 - **Startup Timeout:** 2 minutes
 
+### Building the Docker Image
+
+Integration tests require a Docker image of the OpenCode server. Build it using the provided scripts:
+
+```bash
+# Linux/macOS
+./build-docker-image.sh
+
+# Windows
+build-docker-image.bat
+```
+
+Or via Maven profile:
+```bash
+mvn clean test -P build-docker-image -DrunIntegrationTests
+```
+
 ### Test Dependencies
 
 | Dependency | Scope | Purpose |
 |------------|-------|---------|
-| `spring-boot-starter-test` | test | Spring Boot test support |
-| `testcontainers` | test | Docker container management |
-| `junit-jupiter` | test | JUnit 5 testing framework |
+| `spring-boot-starter-test-classic` | test | Spring Boot test support (intermediate step; modular starters migration deferred) |
+| `testcontainers` (1.20.4) | test | Docker container management |
+| `testcontainers junit-jupiter` (1.20.4) | test | TestContainers JUnit 5 integration |
 | `assertj-core` | test | Fluent assertions |
+
+### Container Reuse
+
+For faster development, enable container reuse in `src/test/resources/.testcontainers.properties`:
+```properties
+testcontainers.reuse.enable=true
+```
+
+Stop reused containers with:
+```bash
+# Linux/macOS
+./stop-reused-container.sh
+
+# Windows
+stop-reused-container.bat
+```
+
+**Note:** Reuse is automatically disabled in CI environments.
 
 ### Troubleshooting
 
@@ -517,19 +563,19 @@ The TestContainers setup configures the OpenCode server with:
 ```
 src/test/
 ├── java/opencode/examples/springboot/
-│   └── controller/
-│       ├── ConfigurationControllerIT.java
-│       ├── DevToolsControllerIT.java
-│       ├── FileOperationsControllerIT.java
-│       ├── InstanceControllerIT.java
-│       ├── MessageControllerIT.java
-│       ├── ProjectControllerIT.java
-│       ├── ProviderControllerIT.java
-│       ├── SessionAdvancedControllerIT.java
-│       ├── SessionCrudControllerIT.java
-│       ├── SystemInfoControllerIT.java
-│       ├── TodoControllerIT.java
-│       └── VcsControllerIT.java
+│   ├── controller/
+│   │   ├── ConfigurationControllerIT.java
+│   │   ├── DevToolsControllerIT.java
+│   │   ├── FileOperationsControllerIT.java
+│   │   ├── InstanceControllerIT.java
+│   │   ├── MessageControllerIT.java
+│   │   ├── ProjectControllerIT.java
+│   │   ├── ProviderControllerIT.java
+│   │   ├── SessionAdvancedControllerIT.java
+│   │   ├── SessionCrudControllerIT.java
+│   │   ├── SystemInfoControllerIT.java
+│   │   ├── TodoControllerIT.java
+│   │   └── VcsControllerIT.java
 │   └── testsupport/
 │       ├── AbstractIntegrationTest.java    # Base test class
 │       └── OpenCodeServerContainer.java    # TestContainers wrapper
@@ -540,8 +586,8 @@ src/test/
 ## Troubleshooting
 
 1. **Port Conflicts**
-   - Default port is 8081
-   - Change in application.yml if needed
+   - Default port is 8080
+   - Change in application.properties if needed
 
 2. **Connection Refused**
    - Ensure OpenCode server is running on port 4096
@@ -549,7 +595,7 @@ src/test/
 
 3. **Auto-configuration Not Working**
    - Verify starter dependency in pom.xml
-   - Check `opencode.*` properties in application.yml
+   - Check `opencode.*` properties in application.properties
 
 ## Integration Testing
 
@@ -567,20 +613,6 @@ The project includes comprehensive integration tests that use Testcontainers to 
    ```bash
    mvn clean test -DrunIntegrationTests
    ```
-
-### Container Reuse
-
-For faster development, enable container reuse in `src/test/resources/.testcontainers.properties`:
-```properties
-testcontainers.reuse.enable=true
-```
-
-Stop reused containers with:
-```bash
-./stop-reused-container.sh
-```
-
-**Note:** Reuse is automatically disabled in CI environments.
 
 ### Documentation
 

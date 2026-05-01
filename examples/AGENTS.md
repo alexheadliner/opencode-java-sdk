@@ -36,7 +36,28 @@ examples/
 │       ├── SessionCrudExample.java
 │       ├── SystemInfoExample.java
 │       ├── TodoExample.java
-│       └── VcsExample.java
+│       ├── VcsExample.java
+│       └── testing/                        # Test infrastructure
+│           ├── ArgumentParser.java
+│           ├── CleanupManager.java
+│           ├── CleanupResult.java
+│           ├── EnvironmentLoader.java
+│           ├── ErrorClassifier.java
+│           ├── ExampleContext.java
+│           ├── ExampleRegistry.java
+│           ├── ExampleWrapper.java
+│           ├── ResourceTracker.java
+│           ├── ResponseValidator.java
+│           ├── ResultReporter.java
+│           ├── SensitiveDataMasker.java
+│           ├── TestConfiguration.java
+│           ├── TestExecutor.java
+│           ├── TestLogger.java
+│           ├── TestResult.java
+│           ├── TestResults.java
+│           ├── TestRunner.java
+│           ├── TrackedResource.java
+│           └── ValidationResult.java
 └── spring-boot/                      # Spring Boot example
     ├── pom.xml
     ├── AGENTS.md                     # Controller documentation
@@ -162,7 +183,7 @@ See [`spring-boot/AGENTS.md`](spring-boot/AGENTS.md) for complete controller doc
 The Spring Boot example includes comprehensive integration tests using TestContainers:
 
 **Test Dependencies**
-- **Spring Boot Starter Test**: JUnit 5, AssertJ, Spring Test
+- **Spring Boot Starter Test Classic**: JUnit 5, AssertJ, Spring Test (intermediate migration step from `spring-boot-starter-test`)
 - **TestContainers**: Integration testing with Docker containers
 - **Maven Surefire Plugin**: Test execution configuration
 
@@ -194,10 +215,10 @@ The Spring Boot example includes comprehensive integration tests using TestConta
 **Running Tests**
 
 ```bash
-# Run all tests
+# Run unit tests only (excludes IT tests by default)
 cd examples/spring-boot && mvn test
 
-# Run integration tests only
+# Run integration tests (includes both unit and IT tests)
 cd examples/spring-boot && mvn test -DrunIntegrationTests
 
 # Run specific test class

@@ -55,12 +55,12 @@ flowchart TB
 |-----------|---------|---------|
 | **Java** | 21 | Primary language |
 | **Maven** | 3.x | Build and dependency management |
-| **Spring Boot** | 3.5.13 | Framework for Spring Boot starter and examples |
+| **Spring Boot** | 4.0.6 | Framework for Spring Boot starter and examples |
 | **Jackson** | 2.21.1 | JSON serialization/deserialization |
 | **SLF4J** | 2.0.16 | Logging facade |
 | **JUnit** | 5.11.4 | Unit testing framework |
 | **AssertJ** | 3.26.3 | Fluent assertion library |
-| **Lombok** | 1.18.36 | Boilerplate code reduction (Spring modules only) |
+| **Lombok** | 1.18.46 | Boilerplate code reduction (Spring Boot example only) |
 
 ## Module Structure
 
@@ -82,7 +82,8 @@ flowchart TB
 
 ### Lombok Usage
 - **SDK module**: NO Lombok - use explicit getters/setters for plain Java compatibility
-- **Spring Boot modules**: Lombok enabled - use `@Getter`, `@Setter`, `@RequiredArgsConstructor`
+- **Spring Boot Starter**: NO Lombok - explicit getters/setters for minimal dependency surface
+- **Spring Boot Example**: Lombok enabled - use `@Getter`, `@Setter`, `@RequiredArgsConstructor`
 
 ### Class Structure
 - Do NOT create inner classes - create separate classes in the same package
@@ -236,7 +237,14 @@ See `docker/opencode/README.md` for setup instructions.
 - Do NOT create tests until directly asked (per project policy)
 - Test framework: JUnit 5
 - Assertion library: AssertJ
-- Spring Boot tests use `spring-boot-starter-test`
+- Spring Boot tests use `spring-boot-starter-test-classic` (intermediate migration step from `spring-boot-starter-test`)
+
+## Migration Notes (Spring Boot 4.0.6)
+
+- **Jakarta EE 11**: `jakarta.annotation-api` upgraded to 3.0.0 in SDK module
+- **Starter renames**: `spring-boot-starter-web` → `spring-boot-starter-webmvc`
+- **Jackson 2 compat**: `spring-boot-jackson2` module added for Jackson 2 compatibility (Jackson 3 migration deferred)
+- **Test starters**: `spring-boot-starter-test` → `spring-boot-starter-test-classic` (individual modular starters migration deferred)
 
 ## Security Considerations
 

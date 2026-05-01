@@ -33,7 +33,7 @@ flowchart TB
     subgraph "Dependencies"
         JACKSON["Jackson 2.21.1<br/>JSON Processing"]
         SLF4J["SLF4J 2.0.16<br/>Logging"]
-        JAKARTA["Jakarta Annotations 2.1.1"]
+JAKARTA["Jakarta Annotations 3.0.0"]
         JSR310["Jackson JSR310<br/>Date/Time Support"]
     end
 
@@ -65,6 +65,7 @@ All classes below are **auto-generated** from `openapi.json` unless marked as ma
 | Class | Package | Source | Description |
 |-------|---------|--------|-------------|
 | `DefaultApi` | `opencode.sdk.api` | Generated | Main API class — entry point for all API calls |
+| `SessionApi` | `opencode.sdk.api` | Generated | Session-specific operations (sessionChildren, sessionGet) |
 | `ApiClient` | `opencode.sdk.invoker` | Generated | Base HTTP client for all API calls |
 | `Configuration` | `opencode.sdk.invoker` | Generated | Global SDK configuration |
 | `ApiException` | `opencode.sdk.invoker` | Generated | API exception handling |
@@ -354,7 +355,7 @@ try {
 | Jackson Annotations | 2.21 | compile | Jackson annotations for generated code |
 | Jackson Core | 2.21.1 | compile | Jackson core functionality |
 | Jackson Datatype JSR310 | 2.21.1 | compile | Java 8 date/time support for generated code |
-| Jakarta Annotation API | 2.1.1 | compile | Jakarta annotations for generated code |
+| Jakarta Annotation API | 3.0.0 | compile | Jakarta annotations for generated code (Jakarta EE 11 baseline) |
 | SLF4J API | 2.0.16 | compile | Logging facade |
 | JUnit Jupiter | 5.11.4 | test | Unit testing |
 | AssertJ | 3.26.3 | test | Fluent assertions |

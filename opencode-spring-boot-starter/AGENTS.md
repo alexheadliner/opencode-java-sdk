@@ -4,21 +4,22 @@ Spring Boot auto-configuration module for OpenCode SDK integration.
 
 ## Purpose
 
-This module provides Spring Boot auto-configuration for the OpenCode SDK, allowing easy integration into Spring Boot applications with minimal configuration. It uses Lombok for boilerplate code reduction.
+This module provides Spring Boot auto-configuration for the OpenCode SDK, allowing easy integration into Spring Boot applications with minimal configuration. It uses explicit getters/setters (no Lombok) to keep the dependency surface minimal.
 
 ## Architecture
 
 ```mermaid
 flowchart TB
     subgraph "Spring Boot Starter"
-        AUTO["OpenCodeAutoConfiguration<br/>@AutoConfiguration"]
+        AUTO["OpenCodeAutoConfiguration<br/>@Configuration"]
         PROPS["OpenCodeProperties<br/>@ConfigurationProperties"]
         SERVICE["OpenCodeService<br/>@Service"]
     end
 
     subgraph "SDK Integration"
-        CLIENT["OpenCodeClient<br/>From SDK"]
-        CONFIG["OpenCodeConfig<br/>From SDK"]
+        CLIENT["ApiClient<br/>From SDK"]
+        DEFAULT_API["DefaultApi<br/>From SDK"]
+        SESSION_API["SessionApi<br/>From SDK"]
     end
 
     subgraph "Spring Boot"
@@ -27,11 +28,12 @@ flowchart TB
     end
 
     AUTO --> PROPS
-    AUTO --> CONFIG
     AUTO --> CLIENT
+    AUTO --> DEFAULT_API
     AUTO --> SERVICE
+    SERVICE --> DEFAULT_API
     SERVICE --> CLIENT
-    CLIENT --> CONFIG
+    SERVICE --> SESSION_API
     SPRING --> BEANS
     BEANS --> AUTO
 
@@ -39,40 +41,39 @@ flowchart TB
     style PROPS fill:#e3f2fd
     style SERVICE fill:#e8f5e9
     style CLIENT fill:#fce4ec
-    style CONFIG fill:#fce4ec
+    style DEFAULT_API fill:#fce4ec
+    style SESSION_API fill:#fce4ec
 ```
 
 ## Key Classes
 
 | Class | Package | Description |
 |-------|---------|-------------|
-| `OpenCodeAutoConfiguration` | `opencode.sdk.springboot.autoconfigure` | Auto-configuration class creating SDK beans |
+| `OpenCodeAutoConfiguration` | `opencode.sdk.springboot.autoconfigure` | Configuration class creating SDK beans with `@ConditionalOnMissingBean` |
 | `OpenCodeProperties` | `opencode.sdk.springboot.autoconfigure` | Configuration properties binding with `opencode.*` prefix |
-| `OpenCodeService` | `opencode.sdk.springboot` | Spring-managed service wrapper for SDK client |
+| `OpenCodeService` | `opencode.sdk.springboot` | Spring-managed service wrapper exposing `DefaultApi` and `SessionApi` |
 
 ## Code Style Guidelines
 
-### Lombok Usage
-This module USES Lombok. Use annotations for boilerplate reduction:
+### NO Lombok
+This module does NOT use Lombok. All classes use explicit getters and setters to minimize the dependency surface.
 
 ```java
-// CORRECT - Use Lombok
-@Getter
-@Setter
+// CORRECT - Explicit getters/setters
 @ConfigurationProperties(prefix = "opencode")
 public class OpenCodeProperties {
     private String baseUrl = "http://localhost:4096";
     private String username;
     private String password;
-    private int timeout = 30;
-}
 
-// Service with constructor injection
-@Service
-@RequiredArgsConstructor
-public class OpenCodeService {
-    private final DefaultApi defaultApi;
-    private final ApiClient apiClient;
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+    // ... remaining getters/setters
 }
 ```
 
@@ -82,28 +83,34 @@ public class OpenCodeService {
    ```java
    @Bean
    @ConditionalOnMissingBean
-   public ApiClient apiClient(OpenCodeConfig config) {
+   public ApiClient apiClient(OpenCodeProperties properties) {
        ApiClient client = new ApiClient();
-       client.updateBaseUri(config.getBaseUrl());
+       client.updateBaseUri(properties.getBaseUrl());
        return client;
    }
    ```
 
 2. **Enable Configuration Properties**
    ```java
-   @AutoConfiguration
+   @Configuration
+   @ConditionalOnClass(ApiClient.class)
    @EnableConfigurationProperties(OpenCodeProperties.class)
    public class OpenCodeAutoConfiguration {
        // ...
    }
    ```
 
-3. **Constructor Injection**
+3. **Constructor Injection** (explicit, no Lombok)
    ```java
-   @AutoConfiguration
-   @RequiredArgsConstructor
-   public class OpenCodeAutoConfiguration {
-       private final OpenCodeProperties properties;
+   @Service
+   public class OpenCodeService {
+       private final DefaultApi defaultApi;
+       private final ApiClient apiClient;
+
+       public OpenCodeService(DefaultApi defaultApi, ApiClient apiClient) {
+           this.defaultApi = defaultApi;
+           this.apiClient = apiClient;
+       }
    }
    ```
 
@@ -116,7 +123,6 @@ opencode:
   base-url: http://localhost:4096
   username: opencode
   password: opencode123
-  timeout: 30
 ```
 
 ### Package Structure
@@ -130,12 +136,12 @@ opencode.sdk.springboot/
 
 ## Dependencies
 
-| Dependency | Version | Scope | Purpose |
-|------------|---------|-------|---------|
-| OpenCode SDK | ${project.version} | compile | Core SDK library |
-| Spring Boot Starter Web | 3.5.13 | compile | Spring Boot web support |
-| Spring Boot Configuration Processor | 3.5.13 | provided | Configuration metadata |
-| Lombok | 1.18.36 | provided | Boilerplate reduction |
+| Dependency | Scope | Purpose |
+|------------|-------|---------|
+| OpenCode SDK | compile | Core SDK library |
+| Spring Boot Starter WebMvc | compile | Spring Boot web support (renamed from `spring-boot-starter-web` in Spring Boot 4.0) |
+| Spring Boot Jackson 2 | compile | Jackson 2 compatibility module (Jackson 3 migration deferred) |
+| Spring Boot Configuration Processor | provided | Configuration metadata |
 
 ## Auto-Configuration Registration
 
@@ -175,27 +181,29 @@ This enables IDE auto-completion for `opencode.*` properties.
 </dependency>
 ```
 
-### application.yml Configuration
+### application.properties Configuration
 
-```yaml
-opencode:
-  base-url: http://localhost:4096
-  username: ${OPENCODE_USERNAME}
-  password: ${OPENCODE_PASSWORD}
-  timeout: 30
+```properties
+opencode.base-url=http://localhost:4096
+opencode.username=${OPENCODE_USERNAME}
+opencode.password=${OPENCODE_PASSWORD}
 ```
 
 ### Service Injection
 
 ```java
 @Service
-@RequiredArgsConstructor
 public class MyService {
     private final OpenCodeService openCodeService;
+
+    public MyService(OpenCodeService openCodeService) {
+        this.openCodeService = openCodeService;
+    }
 
     public void doSomething() throws ApiException {
         GlobalHealth200Response health = openCodeService.getHealth();
         DefaultApi api = openCodeService.api();
+        SessionApi sessionApi = openCodeService.sessionApi();
     }
 }
 ```
@@ -218,13 +226,14 @@ public class MyService {
 ## Integration with SDK
 
 The starter depends on the SDK module and:
-1. Creates `OpenCodeConfig` bean from properties
-2. Creates `ApiClient` bean with Basic Auth configuration
-3. Creates `DefaultApi` bean from `ApiClient`
-4. Exposes `OpenCodeService` as a convenience wrapper
+1. Creates `ApiClient` bean with Basic Auth configuration from properties
+2. Creates `DefaultApi` bean from `ApiClient`
+3. Exposes `OpenCodeService` as a convenience wrapper providing access to both `DefaultApi` and `SessionApi`
 
 ## Version Compatibility
 
-- Spring Boot: 3.5.13+
+- Spring Boot: 4.0.x
 - Java: 21+
 - Aligns with SDK module version
+- Uses `spring-boot-jackson2` compat module (Jackson 3 migration deferred)
+- Jakarta EE 11 baseline (`jakarta.annotation-api` 3.0.0)
