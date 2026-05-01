@@ -1,79 +1,94 @@
 ### Interactive API Tests
 ### Tests for InteractiveController endpoints
-### Base URL: http://localhost:8080
-### OpenCode server: http://localhost:4096
+### Self-contained: creates a session first for permissions/respond, then cleans up.
+### Run requests top-to-bottom.
 
-### Get pending questions
-### Returns all pending questions that need user response
-GET http://localhost:8080/api/interactive/questions
-Content-Type: application/json
-
-###
-
-### Reply to a question
-### Sends a reply to a pending question
-POST http://localhost:8080/api/interactive/questions/reply
+### 1. Create session (captures sessionId)
+POST {{baseUrl}}/api/sessions
 Content-Type: application/json
 
 {
-  "question_id": "question_uuid",
+  "agent": "opencode"
+}
+
+> {%
+  client.global.set("sessionId", response.body.id);
+  client.log("Created session: " + response.body.id);
+%}
+
+### 2. Get pending questions
+GET {{baseUrl}}/api/interactive/questions
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 200, "Questions should return 200");
+  client.log("Questions count: " + response.body.length);
+%}
+
+### 3. Reply to a question (requestId is @RequestParam, not in body)
+POST {{baseUrl}}/api/interactive/questions/reply?requestId=req_123
+Content-Type: application/json
+
+{
   "response": "Yes, proceed with the operation"
 }
 
-###
+> {%
+  client.log("Question reply response: " + response.status);
+%}
 
-### Reply to a question with option selection
-### Sends a reply selecting a specific option
-POST http://localhost:8080/api/interactive/questions/reply
+### 4. Get pending permissions
+GET {{baseUrl}}/api/interactive/permissions
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 200, "Permissions should return 200");
+  client.log("Permissions count: " + response.body.length);
+%}
+
+### 5. Reply to a permission request (requestId is @RequestParam, not in body)
+POST {{baseUrl}}/api/interactive/permissions/reply?requestId=perm_123
 Content-Type: application/json
 
 {
-  "question_id": "question_uuid",
-  "option_id": "option_1"
-}
-
-###
-
-### Get pending permissions
-### Returns all pending permission requests
-GET http://localhost:8080/api/interactive/permissions
-Content-Type: application/json
-
-###
-
-### Reply to a permission request
-### Sends a reply to a pending permission request
-POST http://localhost:8080/api/interactive/permissions/reply
-Content-Type: application/json
-
-{
-  "permission_id": "permission_uuid",
   "allow": true,
   "remember": false
 }
 
-###
+> {%
+  client.log("Permission reply response: " + response.status);
+%}
 
-### Respond to a permission request
-### Alternative endpoint for responding to permission requests
-POST http://localhost:8080/api/interactive/permissions/respond
+### 6. Respond to a permission (sessionId + permissionId are @RequestParam, not in body)
+POST {{baseUrl}}/api/interactive/permissions/respond?sessionId={{sessionId}}&permissionId=perm_456
 Content-Type: application/json
 
 {
-  "id": "permission_uuid",
   "action": "allow"
 }
 
-###
+> {%
+  client.log("Permission respond response: " + response.status);
+%}
 
-### Deny a permission request
-### Denies a pending permission request
-POST http://localhost:8080/api/interactive/permissions/respond
+### 7. Deny a permission request
+POST {{baseUrl}}/api/interactive/permissions/respond?sessionId={{sessionId}}&permissionId=perm_789
 Content-Type: application/json
 
 {
-  "id": "permission_uuid",
   "action": "deny"
 }
 
-###
+> {%
+  client.log("Permission deny response: " + response.status);
+%}
+
+### 8. Delete session (cleanup)
+DELETE {{baseUrl}}/api/sessions/{{sessionId}}
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 204, "Delete should return 204");
+  client.log("Session deleted: " + client.global.get("sessionId"));
+  client.global.set("sessionId", "");
+%}

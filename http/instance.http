@@ -1,35 +1,22 @@
 ### Instance API Tests
 ### Tests for InstanceController endpoints
-### Base URL: http://localhost:8080
-### OpenCode server: http://localhost:4096
+### Uses {{baseUrl}} from http-client.env.json
+### Note: instance creation returns 501, so delete requires a manually set instanceId.
 
 ### Get all instances
-### Returns a list of all server instances
-GET http://localhost:8080/api/instances/
+GET {{baseUrl}}/api/instances
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200, "List instances should return 200");
+  client.log("Instances retrieved");
+%}
 
-### Create new instance
-### Creates a new server instance
-### Note: This endpoint returns 501 (Not Implemented)
-POST http://localhost:8080/api/instances/
+### Create new instance (returns 501 — not implemented by API)
+POST {{baseUrl}}/api/instances
 Content-Type: application/json
 
-{
-  "name": "new-instance",
-  "config": {
-    "provider": "zai",
-    "model": "glm-4.7"
-  }
-}
-
-###
-
-### Delete instance
-### Deletes a specific server instance
-# @prompt instanceId Replace with actual instance ID
-DELETE http://localhost:8080/api/instances/{{instanceId}}
-Content-Type: application/json
-
-###
+> {%
+  client.assert(response.status === 501, "Create instance should return 501");
+  client.log("Instance creation: not implemented (expected)");
+%}

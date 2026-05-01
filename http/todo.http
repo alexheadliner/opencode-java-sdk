@@ -1,12 +1,36 @@
 ### Todo API Tests
 ### Tests for TodoController endpoints
-### Base URL: http://localhost:8080
-### OpenCode server: http://localhost:4096
+### Self-contained: creates a session first, then tests todo endpoint, then cleans up.
+### Run requests top-to-bottom.
 
-### Get session todos
-### Returns the todo list for a specific session
-# @prompt sessionId Replace with actual session ID
-GET http://localhost:8080/api/todos/{{sessionId}}
+### 1. Create session (captures sessionId)
+POST {{baseUrl}}/api/sessions
 Content-Type: application/json
 
-###
+{
+  "agent": "opencode"
+}
+
+> {%
+  client.global.set("sessionId", response.body.id);
+  client.log("Created session: " + response.body.id);
+%}
+
+### 2. Get session todos
+GET {{baseUrl}}/api/todos/{{sessionId}}
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 200, "Todos should return 200");
+  client.log("Todos retrieved");
+%}
+
+### 3. Delete session (cleanup)
+DELETE {{baseUrl}}/api/sessions/{{sessionId}}
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 204, "Delete should return 204");
+  client.log("Session deleted: " + client.global.get("sessionId"));
+  client.global.set("sessionId", "");
+%}

@@ -1,18 +1,36 @@
 ### Configuration API Tests
 ### Tests for ConfigurationController endpoints
-### Base URL: http://localhost:8080
-### OpenCode server: http://localhost:4096
+### Uses {{baseUrl}} from http-client.env.json
 
 ### Get project configuration
-### Returns the current project configuration settings
-GET http://localhost:8080/api/config/project
+GET {{baseUrl}}/api/config/project
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200, "Get config should return 200");
+  client.log("Project config retrieved");
+%}
+
+### Get global configuration
+GET {{baseUrl}}/api/config/global
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 200, "Get global config should return 200");
+  client.log("Global config retrieved");
+%}
+
+### Get available providers configuration
+GET {{baseUrl}}/api/config/providers
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 200, "Get providers config should return 200");
+  client.log("Providers config retrieved");
+%}
 
 ### Update project configuration
-### Patch update for project configuration settings
-PATCH http://localhost:8080/api/config/project
+PATCH {{baseUrl}}/api/config/project
 Content-Type: application/json
 
 {
@@ -22,18 +40,7 @@ Content-Type: application/json
   "model": "glm-4.7"
 }
 
-###
-
-### Get global configuration
-### Returns global OpenCode server configuration
-GET http://localhost:8080/api/config/global
-Content-Type: application/json
-
-###
-
-### Get available providers configuration
-### Returns list of available AI providers and their configurations
-GET http://localhost:8080/api/config/providers
-Content-Type: application/json
-
-###
+> {%
+  client.assert(response.status === 200, "Update config should return 200");
+  client.log("Config updated");
+%}

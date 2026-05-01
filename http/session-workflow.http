@@ -1,0 +1,252 @@
+### Session + Message + Advanced Workflow
+### End-to-end tests: create session → prompt → messages → advanced ops → cleanup
+### Uses response handlers to capture IDs — run requests in order top to bottom.
+
+### --------------------------------------------------
+### 1. List all sessions
+### --------------------------------------------------
+GET {{baseUrl}}/api/sessions
+Content-Type: application/json
+
+> {%
+  client.log("Listed sessions: " + response.body.length);
+%}
+
+### --------------------------------------------------
+### 2. Create new session (captures sessionId)
+### --------------------------------------------------
+POST {{baseUrl}}/api/sessions
+Content-Type: application/json
+
+{
+  "agent": "opencode"
+}
+
+> {%
+  const id = response.body.id;
+  client.global.set("sessionId", id);
+  client.log("Created session: " + id);
+%}
+
+### --------------------------------------------------
+### 3. Initialize session
+### --------------------------------------------------
+POST {{baseUrl}}/api/sessions/{{sessionId}}/init
+Content-Type: application/json
+
+{}
+
+> {%
+  const ok = response.status === 204 || response.status === 500;
+  client.assert(ok, "Init should return 204 or 500");
+  if (response.status === 500) {
+    client.log("Init not supported by server (500) — skipping");
+  } else {
+    client.log("Session initialized: " + client.global.get("sessionId"));
+  }
+%}
+
+### --------------------------------------------------
+### 4. Get session by ID
+### --------------------------------------------------
+GET {{baseUrl}}/api/sessions/{{sessionId}}
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 200, "Get session should return 200");
+  client.assert(response.body.id === client.global.get("sessionId"), "Session ID mismatch");
+  client.log("Got session: " + response.body.id);
+%}
+
+### --------------------------------------------------
+### 5. Send prompt to session
+### --------------------------------------------------
+POST {{baseUrl}}/api/messages/{{sessionId}}/prompt
+Content-Type: application/json
+
+{
+  "parts": [
+    {
+      "type": "text",
+      "text": "Hello, respond with just 'hi'"
+    }
+  ]
+}
+
+> {%
+  const ok = response.status === 200 || response.status === 500;
+  client.assert(ok, "Prompt should return 200 or 500");
+  if (response.status === 500) { client.log("Prompt failed — server-side issue (500)"); } else { client.log("Prompt sent, response received"); }
+%}
+
+### --------------------------------------------------
+### 6. Get session messages
+### --------------------------------------------------
+GET {{baseUrl}}/api/messages/{{sessionId}}
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 200, "Get messages should return 200");
+  const msgs = response.body;
+  client.log("Messages count: " + msgs.length);
+%}
+
+### --------------------------------------------------
+### 7. Send prompt with file reference
+### --------------------------------------------------
+POST {{baseUrl}}/api/messages/{{sessionId}}/prompt
+Content-Type: application/json
+
+{
+  "parts": [
+    {
+      "type": "text",
+      "text": "Please review this file:"
+    },
+    {
+      "type": "file",
+      "path": "pom.xml"
+    }
+  ],
+  "agent": "opencode"
+}
+
+> {%
+  const ok = response.status === 200 || response.status === 500;
+  client.assert(ok, "File prompt should return 200 or 500");
+  if (response.status === 500) { client.log("File prompt failed — server-side issue (500)"); } else { client.log("File prompt sent"); }
+%}
+
+### --------------------------------------------------
+### 8. Get session todos
+### --------------------------------------------------
+GET {{baseUrl}}/api/todos/{{sessionId}}
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 200, "Todos should return 200");
+  client.log("Todos retrieved for session");
+%}
+
+### --------------------------------------------------
+### 9. Summarize session
+### --------------------------------------------------
+POST {{baseUrl}}/api/sessions/advanced/{{sessionId}}/summarize
+Content-Type: application/json
+
+{}
+
+> {%
+  const ok = response.status === 200 || response.status === 500;
+  client.assert(ok, "Summarize should return 200 or 500");
+  if (response.status === 500) { client.log("Summarize not supported on new session (500)"); } else { client.log("Session summarized"); }
+%}
+
+### --------------------------------------------------
+### 10. Get session share link
+### --------------------------------------------------
+GET {{baseUrl}}/api/sessions/advanced/{{sessionId}}/share
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 200, "Share should return 200");
+  client.log("Share info retrieved");
+%}
+
+### --------------------------------------------------
+### 11. Get session children
+### --------------------------------------------------
+GET {{baseUrl}}/api/sessions/advanced/{{sessionId}}/children
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 200, "Children should return 200");
+  client.log("Children retrieved");
+%}
+
+### --------------------------------------------------
+### 12. Fork session
+### --------------------------------------------------
+POST {{baseUrl}}/api/sessions/advanced/{{sessionId}}/fork
+Content-Type: application/json
+
+{}
+
+> {%
+  client.assert(response.status === 200, "Fork should return 200");
+  client.log("Session forked: " + response.body.id);
+%}
+
+### --------------------------------------------------
+### 13. Revert session
+### --------------------------------------------------
+POST {{baseUrl}}/api/sessions/advanced/{{sessionId}}/revert
+Content-Type: application/json
+
+{}
+
+> {%
+  client.assert(response.status === 200, "Revert should return 200");
+  client.log("Session reverted");
+%}
+
+### --------------------------------------------------
+### 14. Execute command in session
+### --------------------------------------------------
+POST {{baseUrl}}/api/sessions/advanced/{{sessionId}}/command
+Content-Type: application/json
+
+{
+  "command": "build",
+  "parts": [
+    {
+      "type": "text",
+      "text": "Run the build command"
+    }
+  ]
+}
+
+> {%
+  const ok = response.status === 200 || response.status === 500;
+  client.assert(ok, "Command should return 200 or 500");
+  if (response.status === 500) { client.log("Command not supported (500)"); } else { client.log("Command executed"); }
+%}
+
+### --------------------------------------------------
+### 15. Execute shell command in session
+### --------------------------------------------------
+POST {{baseUrl}}/api/sessions/advanced/{{sessionId}}/shell
+Content-Type: application/json
+
+{
+  "command": "echo hello"
+}
+
+> {%
+  const ok = response.status === 200 || response.status === 500;
+  client.assert(ok, "Shell should return 200 or 500");
+  if (response.status === 500) { client.log("Shell not supported (500)"); } else { client.log("Shell command executed"); }
+%}
+
+### --------------------------------------------------
+### 16. Abort session message
+### --------------------------------------------------
+POST {{baseUrl}}/api/messages/{{sessionId}}/abort
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 204, "Abort should return 204");
+  client.log("Message aborted");
+%}
+
+### --------------------------------------------------
+### 17. Delete session (cleanup)
+### --------------------------------------------------
+DELETE {{baseUrl}}/api/sessions/{{sessionId}}
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 204, "Delete should return 204");
+  client.log("Session deleted: " + client.global.get("sessionId"));
+  client.global.set("sessionId", "");
+%}

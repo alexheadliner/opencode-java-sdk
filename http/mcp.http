@@ -1,35 +1,55 @@
 ### MCP (Model Context Protocol) API Tests
 ### Tests for McpController endpoints
-### Base URL: http://localhost:8080
-### OpenCode server: http://localhost:4096
+### Self-contained: discovers MCP server name from list, then tests endpoints.
+### Run requests top-to-bottom.
 
-### Get all MCP servers
-### Returns a list of all configured MCP servers
-GET http://localhost:8080/api/mcp
+### 1. Get all MCP servers (captures first server name)
+GET {{baseUrl}}/api/mcp
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200, "MCP list should return 200");
+  const keys = Object.keys(response.body);
+  if (keys.length > 0) {
+    client.global.set("mcpName", keys[0]);
+    client.log("Found MCP server: " + keys[0]);
+  } else {
+    client.log("No MCP servers found");
+  }
+%}
 
-### Get MCP server status
-### Returns the status of a specific MCP server
-# @prompt name Replace with actual MCP server name
-GET http://localhost:8080/api/mcp/{{name}}/status
+### 2. Get MCP server status
+GET {{baseUrl}}/api/mcp/{{mcpName}}/status
 Content-Type: application/json
 
-###
+> {%
+  client.log("MCP status response: " + response.status);
+%}
 
-### Start MCP authentication
-### Initiates the OAuth authentication flow for an MCP server
-# @prompt name Replace with actual MCP server name
-POST http://localhost:8080/api/mcp/{{name}}/auth/start
+### 3. Add MCP server
+POST {{baseUrl}}/api/mcp
 Content-Type: application/json
 
-###
+{
+  "name": "test-mcp-server",
+  "command": "echo",
+  "args": ["hello"]
+}
 
-### Handle MCP OAuth callback
-### Handles the OAuth callback from an MCP server
-# @prompt name Replace with actual MCP server name
-POST http://localhost:8080/api/mcp/{{name}}/auth/callback
+> {%
+  client.log("Add MCP response: " + response.status);
+%}
+
+### 4. Start MCP authentication
+POST {{baseUrl}}/api/mcp/{{mcpName}}/auth/start
+Content-Type: application/json
+
+> {%
+  client.log("MCP auth start response: " + response.status);
+%}
+
+### 5. Handle MCP OAuth callback
+POST {{baseUrl}}/api/mcp/{{mcpName}}/auth/callback
 Content-Type: application/json
 
 {
@@ -37,12 +57,15 @@ Content-Type: application/json
   "state": "oauth_state_parameter"
 }
 
-###
+> {%
+  client.log("MCP auth callback response: " + response.status);
+%}
 
-### Remove MCP authentication
-### Removes stored authentication for an MCP server
-# @prompt name Replace with actual MCP server name
-DELETE http://localhost:8080/api/mcp/{{name}}/auth
+### 6. Remove MCP authentication
+DELETE {{baseUrl}}/api/mcp/{{mcpName}}/auth
 Content-Type: application/json
 
-###
+> {%
+  client.log("MCP auth remove response: " + response.status);
+  client.global.set("mcpName", "");
+%}

@@ -1,11 +1,9 @@
 ### Experimental API Tests
 ### Tests for ExperimentalController endpoints
-### Base URL: http://localhost:8080
-### OpenCode server: http://localhost:4096
+### Uses {{baseUrl}} from http-client.env.json
 
 ### Create workspace
-### Creates a new experimental workspace
-POST http://localhost:8080/api/experimental/workspace
+POST {{baseUrl}}/api/experimental/workspace
 Content-Type: application/json
 
 {
@@ -13,18 +11,22 @@ Content-Type: application/json
   "path": "/projects/my-project"
 }
 
-###
+> {%
+  client.assert(response.status === 200, "Create workspace should return 200");
+  client.log("Workspace created");
+%}
 
-### Get worktree info
-### Returns information about the current worktree
-GET http://localhost:8080/api/experimental/worktree
+### Get worktree list
+GET {{baseUrl}}/api/experimental/worktree
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200, "List worktree should return 200");
+  client.log("Worktrees count: " + response.body.length);
+%}
 
 ### Create worktree
-### Creates a new git worktree
-POST http://localhost:8080/api/experimental/worktree
+POST {{baseUrl}}/api/experimental/worktree
 Content-Type: application/json
 
 {
@@ -32,15 +34,20 @@ Content-Type: application/json
   "path": "/projects/my-project-worktree"
 }
 
-###
+> {%
+  client.assert(response.status === 200, "Create worktree should return 200");
+  client.log("Worktree created");
+%}
 
 ### Remove worktree
-### Removes an existing git worktree
-DELETE http://localhost:8080/api/experimental/worktree
+DELETE {{baseUrl}}/api/experimental/worktree
 Content-Type: application/json
 
 {
   "path": "/projects/my-project-worktree"
 }
 
-###
+> {%
+  client.assert(response.status === 200, "Remove worktree should return 200");
+  client.log("Worktree removed");
+%}

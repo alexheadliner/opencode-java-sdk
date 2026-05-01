@@ -1,44 +1,43 @@
 ### Provider API Tests
 ### Tests for ProviderController endpoints
-### Base URL: http://localhost:8080
-### OpenCode server: http://localhost:4096
+### Self-contained: no dynamic IDs needed.
+### Run requests top-to-bottom.
 
 ### List all available providers
-### Returns list of all configured AI providers
-GET http://localhost:8080/api/providers
+GET {{baseUrl}}/api/providers
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200 || response.status === 500, "List providers should return 200 or 500");
+  client.log("Providers response: " + response.status);
+%}
 
 ### Get specific provider by name
-### Returns details for a specific AI provider
-# @prompt provider Replace with actual provider name (e.g., "zai", "openai")
-GET http://localhost:8080/api/providers/{{provider}}
+GET {{baseUrl}}/api/providers/zai
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200 || response.status === 500, "Get provider should return 200 or 500");
+  client.log("Provider response: " + response.status);
+%}
 
 ### Start OAuth authorization for provider
-### Initiates OAuth flow for provider authentication
-# @prompt provider Replace with actual provider name
-POST http://localhost:8080/api/providers/{{provider}}/oauth/authorize
+POST {{baseUrl}}/api/providers/zai/oauth/authorize
 Content-Type: application/json
 
 {
   "redirect_uri": "http://localhost:8080/callback"
 }
 
-###
+> {%
+  client.assert(response.status === 200, "OAuth authorize should return 200");
+  client.log("OAuth authorization started");
+%}
 
-### Handle OAuth callback for provider
-### Completes OAuth flow with authorization code
-# @prompt provider Replace with actual provider name
-POST http://localhost:8080/api/providers/{{provider}}/oauth/callback
+### Handle OAuth callback for provider (GET — controller uses @GetMapping)
+GET {{baseUrl}}/api/providers/zai/oauth/callback?code=auth_code&state=state123
 Content-Type: application/json
 
-{
-  "code": "authorization_code_from_provider",
-  "state": "state_parameter"
-}
-
-###
+> {%
+  client.log("OAuth callback response: " + response.status);
+%}

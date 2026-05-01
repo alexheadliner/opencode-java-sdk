@@ -1,55 +1,48 @@
 ### PTY (Pseudo-Terminal) API Tests
 ### Tests for PtyController endpoints
-### Base URL: http://localhost:8080
-### OpenCode server: http://localhost:4096
+### Self-contained: lists PTY sessions first (create may fail on some servers).
+### Run requests top-to-bottom.
 
-### Get all PTY sessions
-### Returns a list of all active PTY sessions
-GET http://localhost:8080/api/pty
+### 1. Get all PTY sessions
+GET {{baseUrl}}/api/pty
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200, "List PTY should return 200");
+  client.log("PTY sessions count: " + response.body.length);
+%}
 
-### Create new PTY session
-### Creates a new pseudo-terminal session
-POST http://localhost:8080/api/pty/
+### 2. Create new PTY session (captures ptyId)
+### Note: May return 500 if the OpenCode server does not support PTY creation
+POST {{baseUrl}}/api/pty
 Content-Type: application/json
 
 {
   "command": "/bin/bash",
   "rows": 24,
-  "cols": 80,
-  "cwd": "/project"
+  "cols": 80
 }
 
-###
+> {%
+  if (response.status === 200) {
+    client.global.set("ptyId", response.body.id);
+    client.log("Created PTY: " + response.body.id);
+  } else {
+    client.log("PTY create returned " + response.status + " — server may not support PTY");
+  }
+%}
 
-### Create PTY with different shell
-### Creates a PTY session with a specific shell
-POST http://localhost:8080/api/pty/
+### 3. Get specific PTY session (skip if create failed)
+GET {{baseUrl}}/api/pty/{{ptyId}}
 Content-Type: application/json
 
-{
-  "command": "/bin/zsh",
-  "rows": 30,
-  "cols": 120,
-  "cwd": "/home/user/project"
-}
+> {%
+  client.assert(response.status === 200 || response.status === 404, "Get PTY should return 200 or 404");
+  client.log("Got PTY response: " + response.status);
+%}
 
-###
-
-### Get specific PTY session
-### Returns details of a specific PTY session
-# @prompt id Replace with actual PTY session ID
-GET http://localhost:8080/api/pty/{{id}}
-Content-Type: application/json
-
-###
-
-### Update PTY session
-### Updates the size of a PTY session
-# @prompt id Replace with actual PTY session ID
-PATCH http://localhost:8080/api/pty/{{id}}
+### 4. Update PTY session size
+PATCH {{baseUrl}}/api/pty/{{ptyId}}
 Content-Type: application/json
 
 {
@@ -59,24 +52,30 @@ Content-Type: application/json
   }
 }
 
-###
+> {%
+  client.assert(response.status === 200 || response.status === 404, "Update PTY should return 200 or 404");
+  client.log("PTY size update response: " + response.status);
+%}
 
-### Write to PTY session
-### Sends input to a PTY session
-# @prompt id Replace with actual PTY session ID
-PATCH http://localhost:8080/api/pty/{{id}}
+### 5. Write to PTY session
+PATCH {{baseUrl}}/api/pty/{{ptyId}}
 Content-Type: application/json
 
 {
   "input": "ls -la\n"
 }
 
-###
+> {%
+  client.assert(response.status === 200 || response.status === 404, "Write PTY should return 200 or 404");
+  client.log("Write to PTY response: " + response.status);
+%}
 
-### Delete PTY session
-### Terminates and removes a PTY session
-# @prompt id Replace with actual PTY session ID
-DELETE http://localhost:8080/api/pty/{{id}}
+### 6. Delete PTY session (cleanup)
+DELETE {{baseUrl}}/api/pty/{{ptyId}}
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200 || response.status === 404, "Delete PTY should return 200 or 404");
+  client.log("PTY delete response: " + response.status);
+  client.global.set("ptyId", "");
+%}

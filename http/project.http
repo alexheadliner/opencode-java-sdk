@@ -1,25 +1,27 @@
 ### Project API Tests
 ### Tests for ProjectController endpoints
-### Base URL: http://localhost:8080
-### OpenCode server: http://localhost:4096
+### Uses {{baseUrl}} from http-client.env.json
 
 ### List all projects
-### Returns list of all available projects
-GET http://localhost:8080/api/projects
+GET {{baseUrl}}/api/projects
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200, "List projects should return 200");
+  client.log("Projects count: " + response.body.length);
+%}
 
 ### Get current project
-### Returns the currently active project details
-GET http://localhost:8080/api/projects/current
+GET {{baseUrl}}/api/projects/current
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200, "Current project should return 200");
+  client.log("Current project: " + response.body.id);
+%}
 
 ### Update current project
-### Patch update for current project settings
-PATCH http://localhost:8080/api/projects/current
+PATCH {{baseUrl}}/api/projects/current
 Content-Type: application/json
 
 {
@@ -29,4 +31,7 @@ Content-Type: application/json
   }
 }
 
-###
+> {%
+  client.assert(response.status === 200, "Update project should return 200");
+  client.log("Project updated");
+%}

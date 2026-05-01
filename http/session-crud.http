@@ -1,53 +1,60 @@
 ### Session CRUD API Tests
 ### Tests for SessionCrudController endpoints
-### Base URL: http://localhost:8080
-### OpenCode server: http://localhost:4096
+### Self-contained: creates a session, then tests CRUD, then cleans up.
+### Run requests top-to-bottom.
 
-### List all sessions
-### Returns list of all AI sessions
-GET http://localhost:8080/api/sessions
+### 1. List all sessions
+GET {{baseUrl}}/api/sessions
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200, "List sessions should return 200");
+  client.log("Sessions: " + response.body.length);
+%}
 
-### Create new session
-### Creates a new AI session
-POST http://localhost:8080/api/sessions/
-Content-Type: application/json
-
-{
-  "agent": "opencode",
-  "model": "glm-4.7"
-}
-
-###
-
-### Get session by ID
-### Returns details of a specific session
-# @prompt sessionId Replace with actual session ID
-GET http://localhost:8080/api/sessions/{{sessionId}}
-Content-Type: application/json
-
-###
-
-### Delete session
-### Deletes a specific session
-# @prompt sessionId Replace with actual session ID
-DELETE http://localhost:8080/api/sessions/{{sessionId}}
-Content-Type: application/json
-
-###
-
-### Initialize session
-### Initializes a session with specific configuration
-# @prompt sessionId Replace with actual session ID
-POST http://localhost:8080/api/sessions/{{sessionId}}/init
+### 2. Create new session (captures sessionId)
+POST {{baseUrl}}/api/sessions
 Content-Type: application/json
 
 {
-  "agent": "opencode",
-  "model": "glm-4.7",
-  "prompt": "Hello, how can you help me?"
+  "agent": "opencode"
 }
 
-###
+> {%
+  client.global.set("sessionId", response.body.id);
+  client.assert(response.status === 200, "Create session should return 200");
+  client.assert(response.body.id !== undefined, "Response should contain session id");
+  client.log("Created session: " + response.body.id);
+%}
+
+### 3. Get session by ID
+GET {{baseUrl}}/api/sessions/{{sessionId}}
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 200, "Get session should return 200");
+  client.log("Got session: " + response.body.id);
+%}
+
+### 4. Update session
+PATCH {{baseUrl}}/api/sessions/{{sessionId}}
+Content-Type: application/json
+
+{
+  "title": "Updated session title"
+}
+
+> {%
+  client.assert(response.status === 204, "Update session should return 204");
+  client.log("Session updated");
+%}
+
+### 5. Delete session (cleanup)
+DELETE {{baseUrl}}/api/sessions/{{sessionId}}
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 204, "Delete session should return 204");
+  client.log("Session deleted: " + client.global.get("sessionId"));
+  client.global.set("sessionId", "");
+%}

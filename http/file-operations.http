@@ -1,60 +1,99 @@
 ### File Operations API Tests
 ### Tests for FileOperationsController endpoints
-### Base URL: http://localhost:8080
-### OpenCode server: http://localhost:4096
+### Self-contained: creates a session for diff endpoint, then cleans up.
+### Run requests top-to-bottom.
 
-### Get file tree
-### Returns hierarchical tree structure of project files
-GET http://localhost:8080/api/files/tree
+### 1. Create session (captures sessionId for diff endpoint)
+POST {{baseUrl}}/api/sessions
 Content-Type: application/json
 
-###
+{
+  "agent": "opencode"
+}
 
-### Get file tree with path filter
-### Returns file tree starting from specified path
-GET http://localhost:8080/api/files/tree?path=src/main/java
+> {%
+  client.global.set("sessionId", response.body.id);
+  client.log("Created session: " + response.body.id);
+%}
+
+### 2. Get file tree (path is required)
+GET {{baseUrl}}/api/files/tree?path=.
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200, "File tree should return 200");
+  client.log("File tree retrieved");
+%}
 
-### Get file content
-### Returns content of a specific file
-GET http://localhost:8080/api/files/content?path=src/main/java/opencode/Main.java
+### 3. Get file tree with path filter
+GET {{baseUrl}}/api/files/tree?path=src/main/java
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200, "Filtered tree should return 200");
+  client.log("Filtered tree retrieved");
+%}
 
-### Search in files
-### Search for text pattern in project files
-GET http://localhost:8080/api/files/search?pattern=OpenCode&path=src
+### 4. Get file content
+GET {{baseUrl}}/api/files/content?path=pom.xml
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200, "File content should return 200");
+  client.log("File content retrieved");
+%}
 
-### Find files by name pattern
-### Find files matching a name pattern
-GET http://localhost:8080/api/files/find?pattern=*.java
+### 5. Search in files (uses 'pattern' param)
+GET {{baseUrl}}/api/files/search?pattern=OpenCode&path=src
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200, "Search should return 200");
+  client.log("Search results: " + response.body.length);
+%}
 
-### Get file symbols
-### Returns code symbols (classes, methods, etc.) from a file
-GET http://localhost:8080/api/files/symbols?path=src/main/java/opencode/Main.java
+### 6. Find files by name (uses 'query' param, not 'pattern')
+GET {{baseUrl}}/api/files/find?query=*.java
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200, "Find should return 200");
+  client.log("Files found: " + response.body.length);
+%}
 
-### Get file diff
-### Returns git diff for a file
-GET http://localhost:8080/api/files/diff?path=src/main/java/opencode/Main.java
+### 7. Get file symbols (uses 'query' param, not 'path')
+GET {{baseUrl}}/api/files/symbols?query=Main
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200, "Symbols should return 200");
+  client.log("Symbols retrieved");
+%}
 
-### Get file status
-### Returns git status for files in the project
-GET http://localhost:8080/api/files/status
+### 8. Get file diff (uses 'sessionId' param, not 'path')
+GET {{baseUrl}}/api/files/diff?sessionId={{sessionId}}
 Content-Type: application/json
 
-###
+> {%
+  client.assert(response.status === 200, "Diff should return 200");
+  client.log("Diff retrieved");
+%}
+
+### 9. Get file status
+GET {{baseUrl}}/api/files/status
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 200, "Status should return 200");
+  client.log("File status retrieved");
+%}
+
+### 10. Delete session (cleanup)
+DELETE {{baseUrl}}/api/sessions/{{sessionId}}
+Content-Type: application/json
+
+> {%
+  client.assert(response.status === 204, "Delete should return 204");
+  client.log("Session deleted: " + client.global.get("sessionId"));
+  client.global.set("sessionId", "");
+%}
