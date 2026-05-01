@@ -57,7 +57,7 @@ Migrate the OpenCode Java SDK multi-module Maven project from Spring Boot 3.5.x 
 ## Task Checklist
 - [x] `task-01-pom-dependency-updates.md`: POM Version & Dependency Updates — Suggested agent: Code — Covers: R1, R2, R3, R5, R6, R7, R8, S3
 - [x] `task-02-source-config-adaptations.md`: Source Code & Config Adaptations — Suggested agent: Code — Covers: R4, R6, R8, S1
-- [ ] `task-03-compilation-verification.md`: Compilation Verification — Suggested agent: Test — Covers: R1-R8, S1, S3
+- [x] `task-03-compilation-verification.md`: Compilation Verification — Suggested agent: Test — Covers: R1-R8, S1, S3
 - [ ] `task-04-spring-boot-example-startup.md`: Spring Boot Example Startup — Suggested agent: Test — Covers: R1, R2, R5, R7, S2
 - [x] `task-05-update-agents-md.md`: Update AGENTS.md Files — Suggested agent: Code — Covers: R11, S4
 
